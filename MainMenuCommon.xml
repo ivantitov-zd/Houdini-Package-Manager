@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mainMenu>
+    <menuBar>
+
+        <!-- ========================= Preferences Menu ========================= -->
+
+        <addScriptItem id="h.package_manager">
+            <label>Package Manager...</label>
+            <parent>edit_menu</parent>
+            <insertAfter>h.aliases</insertAfter>
+            <scriptCode>
+import package_manager.main_window as mw
+
+window = mw.MainWindow(hou.qt.mainWindow())
+window.show()
+            </scriptCode>
+        </addScriptItem>
+
+    </menuBar>
+</mainMenu>
