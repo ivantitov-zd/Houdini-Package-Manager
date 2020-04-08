@@ -9,6 +9,8 @@ except ImportError:
 
 import hou
 
+from .github import GitHubAPICache
+
 
 class SettingsWidget(QWidget):
     def __init__(self):
@@ -18,6 +20,12 @@ class SettingsWidget(QWidget):
         layout = QFormLayout(self)
         layout.setContentsMargins(4, 4, 4, 4)
         layout.setSpacing(4)
+
+        # Cache
+        self.web_cache_size = QLabel()  # Todo: calc cache size (API, archives)
+        self.clear_web_cache_button = QPushButton('Clear Web Cache')
+        self.clear_web_cache_button.clicked.connect(GitHubAPICache.clear)
+        layout.addRow(self.web_cache_size, self.clear_web_cache_button)
 
         # Installation
         self.path_field = QLineEdit('$HOUDINI_USER_PREF_DIR')

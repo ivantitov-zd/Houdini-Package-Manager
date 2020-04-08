@@ -43,12 +43,14 @@ class GitHubAPICache:
         }
         if headers:
             headers_data.update(headers)
+
+        GitHubAPICache.loadFromFile()
+
         if url in GitHubAPICache.cache_data:
             cached_item = GitHubAPICache.cache_data[url]
             headers_data['If-Modified-Since'] = cached_item.last_modified
         r = requests.get(url, headers=headers_data, timeout=timeout)
         if r.status_code == 200:
-            GitHubAPICache.loadFromFile()
             data = json.loads(r.text)
             try:
                 last_modified = r.headers['Last-Modified']
@@ -85,11 +87,20 @@ class GitHubAPICache:
     @staticmethod
     def loadFromFile():
         try:
-            file_path = hou.expandString('$HOUDINI_USER_PREF_DIR/package_manager.api_cache')
+            file_path = hou.expandString('$HOUDINI_USER_PREF_DIR/package_manager.github_api_cache')
             with open(file_path) as file:
                 GitHubAPICache.fromJson(json.load(file))
         except IOError:
             pass
+
+    @staticmethod
+    def clear():
+        GitHubAPICache.cache_data = {}
+        GitHubAPICache.saveToFile()
+
+    @staticmethod
+    def cacheSize():
+        raise NotImplementedError
 
 
 class Release:
@@ -227,4 +238,3 @@ def checkUpdates():
     for package in findInstalledPackages():
         if package.source:
             pass
-

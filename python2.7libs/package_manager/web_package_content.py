@@ -75,7 +75,7 @@ class WebPackageInfoView(QWidget):
 
     def updateFromCurrentPackage(self):
         if self.web_package is None:
-            self.self.name_label.setText('')
+            self.name_label.setText('')
             self.desc_label.setText('')
             self.author_label.setText('')
             self.hversion_label.setText('')
@@ -85,12 +85,12 @@ class WebPackageInfoView(QWidget):
             self.install_button.setDisabled(True)
             return
         self.name_label.setText(self.web_package.name)
-        self.desc_label.setText(self.web_package.description)
-        self.author_label.setText(self.web_package.author)
+        self.desc_label.setText(self.web_package.description or '-')
+        self.author_label.setText(self.web_package.author or '-')
         self.hversion_label.setText(self.web_package.hversion or '*')
         self.hlicense_label.setText(fullHoudiniLicenseName(self.web_package.hlicense) or 'Commercial')
         self.status_label.setText(fullPackageStatusName(self.web_package.status) or 'Stable')
-        if self.web_package.source != 'Unknown':
+        if self.web_package.source != '-':
             self.source_label.setText('GitHub: ' + self.web_package.source)
             self.source_label.setLink(repoURL(*ownerAndRepoName(self.web_package.source)))
         else:

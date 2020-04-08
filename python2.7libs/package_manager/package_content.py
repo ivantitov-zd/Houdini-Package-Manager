@@ -66,9 +66,11 @@ class PackageInfoView(QWidget):
         info_block_layout.addRow('Author', self.author_label)
 
         self.version_label = QLabel()
+        self.version_label.setWordWrap(True)
         info_block_layout.addRow('Version', self.version_label)
 
         self.hversion_label = QLabel()
+        self.hversion_label.setWordWrap(True)
         info_block_layout.addRow('Houdini', self.hversion_label)
 
         self.hlicense_label = QLabel()
@@ -90,11 +92,33 @@ class PackageInfoView(QWidget):
         info_block_layout.addRow('Source', self.source_label)
 
         self.state_label = QLabel()
+        self.state_label.setWordWrap(True)
         info_block_layout.addRow('State', self.state_label)
 
         spacer = QSpacerItem(0, 0, QSizePolicy.Ignored, QSizePolicy.Expanding)
         main_layout.addSpacerItem(spacer)
 
+        # Update
+        self.update_group = QGroupBox('Update')
+        self.update_group.setDisabled(True)
+        main_layout.addWidget(self.update_group)
+
+        update_layout = QVBoxLayout()
+        update_layout.setContentsMargins(6, 8, 6, 8)
+        update_layout.setSpacing(4)
+        self.update_group.setLayout(update_layout)
+
+        check_updates_on_startup_toggle = QCheckBox('Check on Startup')
+        update_layout.addWidget(check_updates_on_startup_toggle)
+
+        self.user_choice_update_radio = QRadioButton('User Choice')
+        # self.user_choice_update_radio.setChecked(True)
+        update_layout.addWidget(self.user_choice_update_radio)
+
+        self.update_automatically_radio = QRadioButton('Update Automatically')
+        update_layout.addWidget(self.update_automatically_radio)
+
+        # Enable/Disable
         self.enable_button = QPushButton('Enable')
         self.enable_button.setDisabled(True)
         self.enable_button.clicked.connect(self._onEnable)
@@ -105,6 +129,7 @@ class PackageInfoView(QWidget):
         self.disable_button.clicked.connect(self._onDisable)
         main_layout.addWidget(self.disable_button)
 
+        # Uninstall
         self.uninstall_button = QPushButton('Uninstall')
         self.uninstall_button.setDisabled(True)
         self.uninstall_button.clicked.connect(self._onUninstall)
@@ -142,6 +167,7 @@ class PackageInfoView(QWidget):
             self.source_label.setText('')
             self.source_label.setLink(None)
             self.state_label.setText('')
+            self.update_group.setDisabled(True)
             self.enable_button.setDisabled(True)
             self.disable_button.hide()
             self.uninstall_button.setDisabled(True)
@@ -149,19 +175,20 @@ class PackageInfoView(QWidget):
 
         self.uninstall_button.setEnabled(True)
         self.name_label.setText(self.__package.name)
-        self.desc_label.setText(self.__package.description)
-        self.author_label.setText(self.__package.author)
-        self.version_label.setText(self.__package.version)
-        self.hversion_label.setText(self.__package.hversion)
-        self.hlicense_label.setText(self.__package.hlicense)
-        self.status_label.setText(self.__package.status)
+        self.desc_label.setText(self.__package.description or '-')
+        self.author_label.setText(self.__package.author or '-')
+        self.version_label.setText(self.__package.version or '-')
+        self.hversion_label.setText(self.__package.hversion or '-')
+        self.hlicense_label.setText(self.__package.hlicense or '-')
+        self.status_label.setText(self.__package.status or '-')
         self.location_label.setLink('file:///' + self.__package.content_path)
         self.updatePath()
+        self.update_group.setEnabled(True)
         if self.__package.source is not None:
             self.source_label.setText('GitHub: ' + self.__package.source)
             self.source_label.setLink(repoURL(*ownerAndRepoName(self.__package.source)))
         else:
-            self.source_label.setText('Unknown')
+            self.source_label.setText('-')
             self.source_label.setLink(None)
         if self.__package.isEnabled():
             self.state_label.setText('Enabled')

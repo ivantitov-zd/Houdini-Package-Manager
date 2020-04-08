@@ -128,10 +128,13 @@ def packageNameFromContent(content_path):
     return name
 
 
-def findFiles(path, recursive=False):
+def findFiles(path, ignore_folders=True, recursive=False):
     for root, folders, files in os.walk(path):
         for file in files:
             yield os.path.join(root, file)
+        if not ignore_folders:
+            for folder in folders:
+                yield os.path.join(root, folder)
         if not recursive:
             break
 
@@ -168,7 +171,7 @@ class Package:
         self.hlicense = fullHoudiniLicenseName(data.get(u'hlicense'))
         self.status = fullPackageStatusName(data.get(u'status'))
 
-    def files(self, extensions, root='', recursive=False):
+    def files(self, extensions, root='', ignore_folders=True, recursive=False):
         if not os.path.isdir(self.content_path):
             raise hou.ObjectWasDeleted
 
@@ -177,7 +180,7 @@ class Package:
             return ()
 
         file_list = []
-        for file in findFiles(path, recursive):
+        for file in findFiles(path, ignore_folders, recursive):
             if file.endswith(extensions):
                 file_path = os.path.join(path, file)
                 file_list.append(file_path)
@@ -185,7 +188,9 @@ class Package:
 
     def libraries(self):
         return self.files(('.otl', '.otlnc', '.otllc',
-                           '.hda', '.hdanc', '.hdalc'), 'otls')
+                           '.hda', '.hdanc', '.hdalc'),
+                          root='otls',
+                          ignore_folders=False)
 
     def shelves(self):
         return self.files('.shelf', 'toolbar')
@@ -249,7 +254,7 @@ class Package:
 
 
 def findInstalledPackages():
-    def jsonFromFolderAlphabetical(path):
+    def jsonsFromFolderAlphabetical(path):
         if not os.path.isdir(path):
             return ()
         file_paths = []
@@ -261,20 +266,20 @@ def findInstalledPackages():
 
     json_paths = []
 
-    packages_path1 = hou.expandString('$HOUDINI_USER_PREF_DIR/packages')
-    json_paths.extend(jsonFromFolderAlphabetical(packages_path1))
+    packages_path = hou.expandString('$HOUDINI_USER_PREF_DIR/packages')
+    json_paths.extend(jsonsFromFolderAlphabetical(packages_path))
 
-    packages_path2 = hou.expandString('$HFS/packages')
-    json_paths.extend(jsonFromFolderAlphabetical(packages_path2))
+    packages_path = hou.expandString('$HFS/packages')
+    json_paths.extend(jsonsFromFolderAlphabetical(packages_path))
 
     if hou.getenv('HSITE') is not None:
         major, minor, build = hou.applicationVersion()
-        packages_path3 = hou.expandString('$HSITE/houdini{}.{}/packages'.format(major, minor))
-        json_paths.extend(jsonFromFolderAlphabetical(packages_path3))
+        packages_path = hou.expandString('$HSITE/houdini{}.{}/packages'.format(major, minor))
+        json_paths.extend(jsonsFromFolderAlphabetical(packages_path))
 
     if hou.getenv('HOUDINI_PACKAGE_DIR') is not None:
-        packages_path4 = hou.expandString('$HOUDINI_PACKAGE_DIR')
-        json_paths.extend(jsonFromFolderAlphabetical(packages_path4))
+        packages_path = hou.expandString('$HOUDINI_PACKAGE_DIR')
+        json_paths.extend(jsonsFromFolderAlphabetical(packages_path))
 
     # Todo: support dynamic setting of the package dir if possible
 
