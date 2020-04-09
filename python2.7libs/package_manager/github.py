@@ -14,6 +14,10 @@ from .choose_version_dialog import ChooseVersionDialog
 from .version import Version
 
 
+class RepoNotFound(Exception):
+    pass
+
+
 class CacheItem:
     __slots__ = 'data', 'last_modified'
 
@@ -61,6 +65,8 @@ class GitHubAPICache:
             return data
         elif r.status_code == 304:
             return GitHubAPICache.cache_data[url].data
+        elif r.status_code == 404:
+            raise RepoNotFound  # Todo: explainable message
 
     @staticmethod
     def post(query):
