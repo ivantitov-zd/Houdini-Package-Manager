@@ -36,4 +36,4 @@ def fullHoudiniLicenseName(name_or_lic):
         HOUDINI_INDIE_LICENSE: u'Indie',
         HOUDINI_EDUCATION_LICENSE: u'Education',
         HOUDINI_APPRENTICE_LICENSE: u'Apprentice'
-    }[lic]
+    }.get(lic)

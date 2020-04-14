@@ -1,19 +1,78 @@
 import re
 
 
-class Token:
-    pass
-
-
-class Version:
-    def __new__(cls, *args, **kwargs):
-        if isinstance(args[0], Version):
-            return args[0]
-        return super(Version, cls).__new__(cls)
+class Token(object):
+    def __new__(cls, source):
+        if isinstance(source, Token):
+            return source
+        else:
+            return super(Token, cls).__new__(cls)
 
     def __init__(self, source):
         self.__raw = str(source)
-        self.__tokens = tuple(map(lambda pair: int(pair[1]), re.findall(r'(^\D)?(\d+)', self.__raw)))  # |\w+
+        if source.isdigit():
+            self.__value = int(source)
+        else:  # source.isalpha()
+            self.__value = str(source)
+
+    @property
+    def raw(self):
+        return self.__raw
+
+    @property
+    def value(self):
+        return self.__value
+
+    def __eq__(self, other):
+        if isinstance(other, Token) and isinstance(other.value, int):
+            return self.value == other.value
+        elif isinstance(self.value, int) and isinstance(other, int):
+            return self.value == other
+        elif isinstance(other, Token) and isinstance(other.value, basestring):
+            pass  # Todo
+        else:
+            return NotImplemented
+
+    def __ne__(self, other):
+        if isinstance(other, Token) and isinstance(other.value, int):
+            return self.value != other.value
+        elif isinstance(self.value, int) and isinstance(other, int):
+            return self.value != other
+        else:
+            return NotImplemented
+
+    def __lt__(self, other):
+        if isinstance(other, Token) and isinstance(other.value, int):
+            return self.value < other.value
+        elif isinstance(self.value, int) and isinstance(other, int):
+            return self.value < other
+        else:
+            return NotImplemented
+
+    def __gt__(self, other):
+        if isinstance(other, Token) and isinstance(other.value, int):
+            return self.value > other.value
+        elif isinstance(self.value, int) and isinstance(other, int):
+            return self.value > other
+        else:
+            return NotImplemented
+
+
+class Version(object):
+    def __new__(cls, source):
+        if isinstance(source, Version):
+            return source
+        else:
+            return super(Version, cls).__new__(cls)
+
+    def __init__(self, source):
+        self.__raw = str(source)
+        try:  # Ignoring build metadata
+            source = self.__raw[:source.index('+')]
+        except (ValueError, AttributeError):
+            source = self.__raw
+        self.__tokens = tuple(map(lambda pair: Token(pair[1]),
+                                  re.findall(r'(^\D)?(\d+)',source)))  # |\w+
         first_nonzero_index = -1
         for index, token in enumerate(reversed(self.__tokens), 0):
             if token != 0:
@@ -37,7 +96,7 @@ class Version:
         return self.__raw
 
     def __eq__(self, other):
-        if isinstance(other, (str, Version)):
+        if isinstance(other, (basestring, Version)):
             other = Version(other)
             return self.tokens == other.tokens
         else:
@@ -107,7 +166,7 @@ class Version:
         pass
 
 
-class VersionRange:
+class VersionRange(object):
     def __init__(self, low_version=None, high_version=None):
         if low_version is None:
             self.low_version = Version('0')
@@ -145,7 +204,7 @@ class VersionRange:
                                                self.high_version.__repr__())
 
     def __contains__(self, item):
-        if isinstance(item, (str, Version)):
+        if isinstance(item, (basestring, Version)):
             version = Version(item)
             return self.low_version <= version <= self.high_version
         elif isinstance(item, VersionRange):
@@ -160,8 +219,10 @@ class VersionRange:
             raise TypeError
 
 
-class VersionPattern:
+class VersionPattern(object):
     def __init__(self, pattern):
+        self.__raw = str(pattern)
+
         self.__include = []
         self.__exclude = []
 
@@ -171,8 +232,12 @@ class VersionPattern:
             else:
                 self.__include.append(VersionRange.fromPattern(token))
 
+    @property
+    def raw(self):
+        return self.__raw
+
     def __contains__(self, item):
-        if isinstance(item, (str, Version)):
+        if isinstance(item, (basestring, Version)):
             version = Version(item)
             return version in self.__include and \
                    version not in self.__exclude

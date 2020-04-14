@@ -100,6 +100,7 @@ class PackageInfoView(QWidget):
 
         # Update
         self.update_group = QGroupBox('Update')
+        self.update_group.hide()
         self.update_group.setDisabled(True)
         main_layout.addWidget(self.update_group)
 

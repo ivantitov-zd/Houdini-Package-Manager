@@ -139,7 +139,7 @@ def findFiles(path, ignore_folders=True, recursive=False):
             break
 
 
-class Package:
+class LocalPackage:
     def __init__(self, package_file):
         self.package_file = os.path.normpath(package_file).replace('\\', '/')
 
@@ -283,4 +283,4 @@ def findInstalledPackages():
 
     # Todo: support dynamic setting of the package dir if possible
 
-    return tuple(Package(path) for path in json_paths)
+    return tuple(LocalPackage(path) for path in json_paths)

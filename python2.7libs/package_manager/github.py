@@ -8,10 +8,11 @@ import time
 import hou
 import requests
 
-from .package import isPackage, NotPackageError, Package
+from .local_package import isPackage, NotPackageError, LocalPackage
 from .houdini_license import fullHoudiniLicenseName, HOUDINI_COMMERCIAL_LICENSE
 from .choose_version_dialog import ChooseVersionDialog
 from .version import Version
+from .web_package import WebPackage
 
 
 class RepoNotFound(Exception):
@@ -177,6 +178,7 @@ def updatePackageDataFile(repo_data, web_package, package_location, version, ver
             data = json.load(file)
     except (IOError, ValueError):
         data = {}
+    web_package = web_package or WebPackage()
     if not data.get('name'):
         data['name'] = web_package.name or repo_data['name']
     if not data.get('description'):
@@ -212,8 +214,12 @@ def downloadRepoZipArchive(repo_data, version=None, dst_location='$TEMP'):
     return zip_file_path
 
 
-def installFromGitHubRepo(web_package, dst_location='$HOUDINI_USER_PREF_DIR'):
-    repo_owner, repo_name = ownerAndRepoName(web_package.source)
+def installFromGitHubRepo(web_package_or_link, dst_location='$HOUDINI_USER_PREF_DIR'):
+    if isinstance(web_package_or_link, WebPackage):
+        repo_owner, repo_name = ownerAndRepoName(web_package_or_link.source)
+    else:
+        repo_owner, repo_name = ownerAndRepoName(web_package_or_link)
+        web_package_or_link = None
     api_repo_url = 'https://api.github.com/repos/{}/{}'.format(repo_owner, repo_name)
     repo_data = GitHubAPICache.get(api_repo_url)
     version = None
@@ -235,12 +241,5 @@ def installFromGitHubRepo(web_package, dst_location='$HOUDINI_USER_PREF_DIR'):
     os.remove(zip_file)  # Todo: optional
     if len(versions) == 0:
         version = repo_data['pushed_at']
-    updatePackageDataFile(repo_data, web_package, package_location, version, version_type)
-    Package.install(package_location)
-
-
-def checkUpdates():
-    from .package import findInstalledPackages
-    for package in findInstalledPackages():
-        if package.source:
-            pass
+    updatePackageDataFile(repo_data, web_package_or_link, package_location, version, version_type)
+    LocalPackage.install(package_location)

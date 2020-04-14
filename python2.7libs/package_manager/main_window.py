@@ -11,13 +11,15 @@ except ImportError:
 
 import hou
 
-from .package import Package, findInstalledPackages
+from .local_package import LocalPackage, findInstalledPackages
 from .package_list import *
 from .package_content import *
 from .web_package_list import *
 from .web_package_content import WebPackageInfoView
-from .github import GitHubAPICache
+from .github import GitHubAPICache, installFromGitHubRepo
 from .settings import SettingsWidget
+from .install_web_dialog import InstallFromWebLinkDialog
+from .install_local_dialog import InstallFromFolderPathDialog
 
 
 class MainWindow(QWidget):
@@ -38,11 +40,11 @@ class MainWindow(QWidget):
         main_layout.addLayout(top_layout)
 
         local_install_button = QPushButton('Install Local Package')
-        local_install_button.clicked.connect(self.chooseAndInstallPackageFolder)
+        local_install_button.clicked.connect(self.pickAndInstallPackageFolder)
         top_layout.addWidget(local_install_button)
 
         web_install_button = QPushButton('Install Web Package')
-        web_install_button.clicked.connect(lambda: print)
+        web_install_button.clicked.connect(self.installPackageFromWebLink)
         top_layout.addWidget(web_install_button)
 
         top_spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Ignored)
@@ -190,12 +192,21 @@ class MainWindow(QWidget):
     def updateWebContentSource(self):
         self.web_info_view.setWebPackage(self.current_web_package)
 
-    def chooseAndInstallPackageFolder(self):
-        path = QFileDialog.getExistingDirectory(self, 'Package Folder')
-        if not path:  # Canceled
-            return
-        Package.install(path)
+    def pickAndInstallPackageFolder(self):
+        ok, path = InstallFromFolderPathDialog.getInstallationData(self)
+        if ok and path:
+            LocalPackage.install(path)
         self.updateLocalPackageList()
+        hou.ui.setStatusMessage('Successfully installed',
+                                hou.severityType.ImportantMessage)
+
+    def installPackageFromWebLink(self):
+        ok, link = InstallFromWebLinkDialog.getInstallationData(self)
+        if ok and link:
+            installFromGitHubRepo(link)
+        self.updateLocalPackageList()
+        hou.ui.setStatusMessage('Successfully installed',
+                                hou.severityType.ImportantMessage)
 
     def _setCurrentPackage(self, index):
         package = index.data(Qt.UserRole)

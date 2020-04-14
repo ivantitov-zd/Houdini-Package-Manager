@@ -8,9 +8,6 @@ except ImportError:
     from PySide2.QtCore import *
 
 
-# import hou
-
-
 class ChooseVersionDialog(QDialog):
     def __init__(self, parent=None):
         super(ChooseVersionDialog, self).__init__(parent)
