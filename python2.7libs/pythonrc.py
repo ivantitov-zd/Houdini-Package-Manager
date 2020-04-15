@@ -1,5 +1,6 @@
 if hou.isUIAvailable():
     import hdefereval
-    from package_manager.github import checkUpdates
 
-    hdefereval.executeDeferred(checkUpdates)
+    from package_manager.update import checkForUpdates
+
+    hdefereval.executeDeferred(checkForUpdates)

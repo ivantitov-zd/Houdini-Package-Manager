@@ -15,8 +15,8 @@ def truncateMid(value, length):
         return '…'
 
     mid = (length - 1) / 2
-    pre = value[:math.floor(mid)]
-    post = value[len(value) - math.ceil(mid):]
+    pre = value[:int(mid)]
+    post = value[int(len(value) - math.ceil(mid)):]
 
     return '{}…{}'.format(pre, post)
 

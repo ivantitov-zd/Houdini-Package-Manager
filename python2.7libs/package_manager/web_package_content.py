@@ -9,6 +9,8 @@ except ImportError:
     from PySide2.QtGui import *
     from PySide2.QtCore import *
 
+import hou
+
 from .link_label import LinkLabel
 from .github import ownerAndRepoName, repoURL, installFromGitHubRepo
 from .web_package import WebPackage
@@ -107,4 +109,6 @@ class WebPackageInfoView(QWidget):
             installFromGitHubRepo(self.web_package)
         self.web_package = None
         self.updateFromCurrentPackage()
+        hou.ui.setStatusMessage('Successfully installed',
+                                hou.severityType.ImportantMessage)
         self.installed.emit()

@@ -226,8 +226,8 @@ def installFromGitHubRepo(web_package_or_link, dst_location='$HOUDINI_USER_PREF_
     api_releases_url = api_repo_url + '/releases'
     versions = []
     for release_data in GitHubAPICache.get(api_releases_url):
-        if not release_data['prerelease']:
-            versions.append(Version(release_data['tag_name']))
+        # if not release_data['prerelease']:
+        versions.append(Version(release_data['tag_name']))
     if versions:
         version_type = 'version'
     else:
