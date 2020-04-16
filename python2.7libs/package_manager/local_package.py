@@ -167,6 +167,7 @@ class LocalPackage:
         self.source_type = data.get(u'source_type')
         self.author = data.get(u'author')
         self.version = data.get(u'version')
+        self.version_type = data.get(u'version_type')
         self.hversion = data.get(u'hversion')
         self.hlicense = fullHoudiniLicenseName(data.get(u'hlicense'))
         self.status = fullPackageStatusName(data.get(u'status'))
@@ -238,14 +239,6 @@ class LocalPackage:
         # Todo: optional remove package content folder
         os.remove(self.package_file)
 
-    def hasUpdates(self):
-        pass
-
-    def update(self, silent=False):
-        if self.source_type == 'github':
-            # installFromGitHubRepo()
-            pass
-
     def __repr__(self):
         return 'Package(r"{0}")'.format(self.package_file)
 
@@ -274,7 +267,7 @@ def findInstalledPackages():
 
     if hou.getenv('HSITE') is not None:
         major, minor, build = hou.applicationVersion()
-        packages_path = hou.expandString('$HSITE/houdini{}.{}/packages'.format(major, minor))
+        packages_path = hou.expandString('$HSITE/houdini{0}.{1}/packages'.format(major, minor))
         json_paths.extend(jsonsFromFolderAlphabetical(packages_path))
 
     if hou.getenv('HOUDINI_PACKAGE_DIR') is not None:

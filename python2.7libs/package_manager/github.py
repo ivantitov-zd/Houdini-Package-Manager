@@ -4,6 +4,7 @@ import shutil
 import tempfile
 import zipfile
 import time
+import datetime
 
 import hou
 import requests
@@ -140,12 +141,12 @@ def ownerAndRepoName(source):
 
 
 def repoURL(owner, repo_name):
-    return 'https://github.com/{}/{}'.format(owner, repo_name)
+    return 'https://github.com/{0}/{1}'.format(owner, repo_name)
 
 
 def isPackageRepo(source):
     repo_owner, repo_name = ownerAndRepoName(source)
-    api_repo_url = 'https://api.github.com/repos/{}/{}/contents/'.format(repo_owner, repo_name)
+    api_repo_url = 'https://api.github.com/repos/{0}/{1}/contents/'.format(repo_owner, repo_name)
     repo_content = GitHubAPICache.get(api_repo_url)
     items = tuple(file_data['name'] for file_data in repo_content)
     return isPackage(items)
@@ -206,7 +207,7 @@ def downloadRepoZipArchive(repo_data, version=None, dst_location='$TEMP'):
     repo_owner = repo_data['owner']['login']
     repo_name = repo_data['name']
     branch = repo_data.get('default_branch', 'master')
-    zip_url = 'https://github.com/{}/{}/zipball/{}'.format(repo_owner, repo_name, version or branch)
+    zip_url = 'https://github.com/{0}/{1}/zipball/{2}'.format(repo_owner, repo_name, version or branch)
     zip_file_path = os.path.join(hou.expandString(dst_location), repo_name + '.zip')
     with open(zip_file_path, 'wb') as file:
         r = requests.get(zip_url, timeout=5)
@@ -214,18 +215,21 @@ def downloadRepoZipArchive(repo_data, version=None, dst_location='$TEMP'):
     return zip_file_path
 
 
-def installFromGitHubRepo(web_package_or_link, dst_location='$HOUDINI_USER_PREF_DIR'):
+def installFromRepo(web_package_or_link, dst_location='$HOUDINI_USER_PREF_DIR', update=False):
     if isinstance(web_package_or_link, WebPackage):
-        repo_owner, repo_name = ownerAndRepoName(web_package_or_link.source)
-    else:
+        web_package = web_package_or_link
+        repo_owner, repo_name = ownerAndRepoName(web_package.source)
+    else:  # web_package_or_link is link
         repo_owner, repo_name = ownerAndRepoName(web_package_or_link)
-        web_package_or_link = None
-    api_repo_url = 'https://api.github.com/repos/{}/{}'.format(repo_owner, repo_name)
-    repo_data = GitHubAPICache.get(api_repo_url)
+        web_package = None
+
+    repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(repo_owner, repo_name)
+    repo_data = GitHubAPICache.get(repo_api_url)
+
     version = None
-    api_releases_url = api_repo_url + '/releases'
+    releases_api_url = repo_api_url + '/releases'
     versions = []
-    for release_data in GitHubAPICache.get(api_releases_url):
+    for release_data in GitHubAPICache.get(releases_api_url):
         # if not release_data['prerelease']:
         versions.append(Version(release_data['tag_name']))
     if versions:
@@ -234,12 +238,34 @@ def installFromGitHubRepo(web_package_or_link, dst_location='$HOUDINI_USER_PREF_
         version_type = 'time_github'
     if len(versions) == 1:
         version = versions[0].raw
-    elif len(versions) > 1:
+    elif len(versions) > 1 and not update:
         version = ChooseVersionDialog.getVersion(hou.qt.mainWindow(), versions).raw
+
     zip_file = downloadRepoZipArchive(repo_data, version)
     package_location = extractRepoZip(zip_file, repo_data, dst_location)
-    os.remove(zip_file)  # Todo: optional
+    os.remove(zip_file)
     if len(versions) == 0:
         version = repo_data['pushed_at']
-    updatePackageDataFile(repo_data, web_package_or_link, package_location, version, version_type)
+    updatePackageDataFile(repo_data, web_package, package_location, version, version_type)
     LocalPackage.install(package_location)
+
+
+def parseTimestamp(timestamp_string):
+    return datetime.datetime.strptime(timestamp_string, '%Y-%m-%dT%H:%M:%SZ')
+
+
+def repoHasUpdate(link, version, version_type):
+    repo_owner, repo_name = ownerAndRepoName(link)
+
+    repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(repo_owner, repo_name)
+    if version_type == 'time_github':
+        repo_data = GitHubAPICache.get(repo_api_url)
+        latest_version = parseTimestamp(repo_data['pushed_at'])
+    else:
+        releases_api_url = repo_api_url + '/releases'
+        releases_data = GitHubAPICache.get(releases_api_url)
+        if not releases_data or 'tag_name' not in releases_data[0]:
+            return False
+        latest_version = Version(releases_data[0]['tag_name'])
+
+    return latest_version > version

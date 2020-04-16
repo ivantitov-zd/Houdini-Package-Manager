@@ -16,7 +16,7 @@ from .package_list import *
 from .package_content import *
 from .web_package_list import *
 from .web_package_content import WebPackageInfoView
-from .github import GitHubAPICache, installFromGitHubRepo
+from . import github
 from .settings import SettingsWidget
 from .install_web_dialog import InstallFromWebLinkDialog
 from .install_local_dialog import InstallFromFolderPathDialog
@@ -196,17 +196,17 @@ class MainWindow(QWidget):
         ok, path = InstallFromFolderPathDialog.getInstallationData(self)
         if ok and path:
             LocalPackage.install(path)
-        self.updateLocalPackageList()
-        hou.ui.setStatusMessage('Successfully installed',
-                                hou.severityType.ImportantMessage)
+            hou.ui.setStatusMessage('Successfully installed',
+                                    hou.severityType.ImportantMessage)
+            self.updateLocalPackageList()
 
     def installPackageFromWebLink(self):
         ok, link = InstallFromWebLinkDialog.getInstallationData(self)
         if ok and link:
-            installFromGitHubRepo(link)
-        self.updateLocalPackageList()
-        hou.ui.setStatusMessage('Successfully installed',
-                                hou.severityType.ImportantMessage)
+            github.installFromRepo(link)
+            hou.ui.setStatusMessage('Successfully installed',
+                                    hou.severityType.ImportantMessage)
+            self.updateLocalPackageList()
 
     def _setCurrentPackage(self, index):
         package = index.data(Qt.UserRole)

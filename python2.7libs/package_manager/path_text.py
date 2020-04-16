@@ -18,7 +18,7 @@ def truncateMid(value, length):
     pre = value[:int(mid)]
     post = value[int(len(value) - math.ceil(mid)):]
 
-    return '{}…{}'.format(pre, post)
+    return '{0}…{1}'.format(pre, post)
 
 
 def truncatePath(path, length):
@@ -44,7 +44,7 @@ def truncatePath(path, length):
     pre = path[:length - filename_length - 2]
     post = path[last_separator:]
 
-    return '{}…{}'.format(pre, post)
+    return '{0}…{1}'.format(pre, post)
 
 
 def preparePath(path, length):

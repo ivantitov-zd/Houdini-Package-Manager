@@ -14,7 +14,7 @@ import hou
 from .link_label import LinkLabel
 from .path_text import preparePath
 from .shelves import definitionsInFile
-from .github import ownerAndRepoName, repoURL
+from . import github
 
 
 class IconCache:
@@ -187,7 +187,7 @@ class PackageInfoView(QWidget):
         self.update_group.setEnabled(True)
         if self.__package.source is not None:
             self.source_label.setText('GitHub: ' + self.__package.source)
-            self.source_label.setLink(repoURL(*ownerAndRepoName(self.__package.source)))
+            self.source_label.setLink(github.repoURL(*github.ownerAndRepoName(self.__package.source)))
         else:
             self.source_label.setText('-')
             self.source_label.setLink(None)

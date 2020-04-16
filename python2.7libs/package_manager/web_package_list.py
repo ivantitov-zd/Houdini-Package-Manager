@@ -33,8 +33,8 @@ class WebPackageListModel(QAbstractListModel):
         items = []
         hversion = Version(hou.applicationVersionString())
         for name, package_data in sorted(data.items(), key=itemgetter(0)):
-            if not package_data.get('visible', True):
-                continue
+            # if not package_data.get('visible', True):
+            #     continue
             if hversion not in VersionRange.fromPattern(package_data.get('hversion', '*')):
                 continue
             items.append(WebPackage(

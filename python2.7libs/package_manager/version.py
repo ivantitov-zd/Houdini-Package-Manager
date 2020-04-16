@@ -172,8 +172,6 @@ class Version(object):
         if first_nonzero_index > 0:
             self.__num_tokens = self.__num_tokens[:-first_nonzero_index]
 
-        self.__is_stable = bool(self.__qualifier_tokens)
-
     @property
     def raw(self):
         return self.__raw
@@ -186,12 +184,8 @@ class Version(object):
     def qualifier_tokens(self):
         return self.__qualifier_tokens
 
-    @property
-    def is_stable(self):
-        return self.__is_stable
-
     def __repr__(self):
-        return 'Version("{}")'.format(self.__raw)
+        return 'Version("{0}")'.format(self.__raw)
 
     def __str__(self):
         return self.__raw
@@ -229,6 +223,22 @@ class Version(object):
             return True
         elif self_len > other_len:
             return False
+
+        self_len = len(self.__qualifier_tokens)
+        other_len = len(other.qualifier_tokens)
+        other_tokens = other.qualifier_tokens
+        if self_len > other_len:
+            return True
+        elif self_len < other_len:
+            return False
+        for i in range(min(self_len, other_len)):
+            self_value = self.__qualifier_tokens[i]
+            other_value = other_tokens[i]
+            if self_value == other_value:
+                continue
+            elif self_value < other_value:
+                return True
+        return False
 
     def __gt__(self, other):
         other = Version(other)

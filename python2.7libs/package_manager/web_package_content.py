@@ -12,7 +12,7 @@ except ImportError:
 import hou
 
 from .link_label import LinkLabel
-from .github import ownerAndRepoName, repoURL, installFromGitHubRepo
+from . import github
 from .web_package import WebPackage
 from .houdini_license import fullHoudiniLicenseName
 from .package_status import fullPackageStatusName
@@ -94,7 +94,7 @@ class WebPackageInfoView(QWidget):
         self.status_label.setText(fullPackageStatusName(self.web_package.status) or 'Stable')
         if self.web_package.source != '-':
             self.source_label.setText('GitHub: ' + self.web_package.source)
-            self.source_label.setLink(repoURL(*ownerAndRepoName(self.web_package.source)))
+            self.source_label.setLink(github.repoURL(*github.ownerAndRepoName(self.web_package.source)))
         else:
             self.source_label.setText(self.web_package.source)
             self.source_label.setLink(None)
@@ -106,7 +106,7 @@ class WebPackageInfoView(QWidget):
 
     def _onInstall(self):
         if self.web_package.source_type == 'github':
-            installFromGitHubRepo(self.web_package)
+            github.installFromRepo(self.web_package)
         self.web_package = None
         self.updateFromCurrentPackage()
         hou.ui.setStatusMessage('Successfully installed',

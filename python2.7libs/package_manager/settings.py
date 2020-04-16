@@ -9,7 +9,7 @@ except ImportError:
 
 import hou
 
-from .github import GitHubAPICache
+from . import github
 
 
 class SettingsWidget(QWidget):
@@ -24,7 +24,7 @@ class SettingsWidget(QWidget):
         # Cache
         self.web_cache_size = QLabel()  # Todo: calc cache size (API, archives)
         self.clear_web_cache_button = QPushButton('Clear Web Cache')
-        self.clear_web_cache_button.clicked.connect(GitHubAPICache.clear)
+        self.clear_web_cache_button.clicked.connect(github.GitHubAPICache.clear)
         layout.addRow(self.web_cache_size, self.clear_web_cache_button)
 
         # Installation
