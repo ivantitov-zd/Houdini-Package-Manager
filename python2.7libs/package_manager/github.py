@@ -20,6 +20,10 @@ class RepoNotFound(Exception):
     pass
 
 
+class ReachedAPILimit(Exception):
+    pass
+
+
 class CacheItem:
     __slots__ = 'data', 'last_modified'
 
@@ -56,6 +60,7 @@ class GitHubAPICache:
             cached_item = GitHubAPICache.cache_data[url]
             headers_data['If-Modified-Since'] = cached_item.last_modified
         r = requests.get(url, headers=headers_data, timeout=timeout)
+        # print(r.headers['X-Ratelimit-Remaining'])
         if r.status_code == 200:
             data = json.loads(r.text)
             try:
@@ -66,13 +71,16 @@ class GitHubAPICache:
                 pass
             return data
         elif r.status_code == 304:
+            # print('Cache hit!')
             return GitHubAPICache.cache_data[url].data
+        elif r.status_code == 403:
+            raise ReachedAPILimit
         elif r.status_code == 404:
             raise RepoNotFound  # Todo: explainable message
 
     @staticmethod
     def post(query):
-        """Tests only, don't use in production"""
+        """Test only, don't use in production"""
         headers = {'Authorization': 'Bearer 008d86db69e83cef0e1df1d2d3691b6efcc28be6'}
         r = requests.post('https://api.github.com/graphql', json={'query': query}, headers=headers)
         print(r.text)
@@ -152,10 +160,12 @@ def isPackageRepo(source):
     return isPackage(items)
 
 
-def extractRepoZip(file_path, repo_data, dst_location='$HOUDINI_USER_PREF_DIR'):
-    package_name = repo_data.get('full_name', os.path.splitext(os.path.basename(file_path))[0])
-    package_name = package_name.replace('/', '_')
-    dst_location = os.path.join(hou.expandString(dst_location), package_name)
+def extractRepoZip(file_path, repo_data, dst_location='$HOUDINI_USER_PREF_DIR', dst_name=None):
+    if not dst_name:
+        _, extension = os.path.splitext(os.path.basename(file_path))
+        dst_name = repo_data.get('full_name', extension)
+        dst_name = dst_name.replace('/', '_')
+    dst_location = os.path.join(hou.expandString(dst_location), dst_name)
     if os.path.exists(dst_location):
         shutil.rmtree(dst_location)
     with zipfile.ZipFile(file_path) as file:
@@ -172,33 +182,39 @@ def ownerName(login):
     return GitHubAPICache.get('https://api.github.com/users/' + login).get('name', login)
 
 
-def updatePackageDataFile(repo_data, web_package, package_location, version, version_type):
+def updatePackageDataFile(repo_data, package, package_location,
+                          version, version_type, update=False):
     data_file_path = os.path.join(package_location, 'package.setup')
     try:
         with open(data_file_path) as file:
             data = json.load(file)
     except (IOError, ValueError):
         data = {}
-    web_package = web_package or WebPackage()
-    if not data.get('name'):
-        data['name'] = web_package.name or repo_data['name']
-    if not data.get('description'):
-        data['description'] = web_package.description or repo_data['description']
-    if not data.get('author'):
-        data['author'] = web_package.author or repo_data['owner']['login']
-    if not data.get('source'):
-        data['source'] = web_package.source or repo_data['full_name']
+    package = package or WebPackage()
+    if not data.get('name') or update:
+        data['name'] = package.name or repo_data['name']
+    if not data.get('description') or update:
+        data['description'] = package.description or repo_data['description']
+    if not data.get('author') or update:
+        data['author'] = package.author or repo_data['owner']['login']
+    if not data.get('source') or update:
+        data['source'] = package.source or repo_data['full_name']
     if not data.get('source_type'):
-        data['source_type'] = web_package.source_type or 'github'
-    if not data.get('version'):
+        data['source_type'] = package.source_type or 'github'
+    if not data.get('version') or update:
         data['version'] = version
         data['version_type'] = version_type
-    if not data.get('hversion'):
-        data['hversion'] = web_package.hversion or '*'
+    elif not data.get('version_type'):
+        data['version_type'] = package.version_type
+    if not data.get('hversion') or update:
+        data['hversion'] = package.hversion or '*'
     if not data.get('hlicense'):
-        data['hlicense'] = web_package.hlicense or fullHoudiniLicenseName(HOUDINI_COMMERCIAL_LICENSE)
-    if not data.get('status'):
-        data['status'] = web_package.status or 'Stable'
+        data['hlicense'] = package.hlicense or \
+                           fullHoudiniLicenseName(HOUDINI_COMMERCIAL_LICENSE)
+    if not data.get('status') or update:
+        data['status'] = package.status or 'Stable'
+    if not data.get('setup_scheme') or update:
+        data['setup_scheme'] = package.setup_scheme
     with open(data_file_path, 'w') as file:
         json.dump(data, file, indent=4, encoding='utf-8')
 
@@ -215,13 +231,13 @@ def downloadRepoZipArchive(repo_data, version=None, dst_location='$TEMP'):
     return zip_file_path
 
 
-def installFromRepo(web_package_or_link, dst_location='$HOUDINI_USER_PREF_DIR', update=False):
-    if isinstance(web_package_or_link, WebPackage):
-        web_package = web_package_or_link
-        repo_owner, repo_name = ownerAndRepoName(web_package.source)
-    else:  # web_package_or_link is link
-        repo_owner, repo_name = ownerAndRepoName(web_package_or_link)
-        web_package = None
+def installFromRepo(package_or_link, dst_location='$HOUDINI_USER_PREF_DIR', update=False):
+    if isinstance(package_or_link, (WebPackage, LocalPackage)):
+        package = package_or_link
+        repo_owner, repo_name = ownerAndRepoName(package.source)
+    else:  # package_or_link is link
+        repo_owner, repo_name = ownerAndRepoName(package_or_link)
+        package = None
 
     repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(repo_owner, repo_name)
     repo_data = GitHubAPICache.get(repo_api_url)
@@ -236,18 +252,24 @@ def installFromRepo(web_package_or_link, dst_location='$HOUDINI_USER_PREF_DIR', 
         version_type = 'version'
     else:
         version_type = 'time_github'
-    if len(versions) == 1:
-        version = versions[0].raw
-    elif len(versions) > 1 and not update:
-        version = ChooseVersionDialog.getVersion(hou.qt.mainWindow(), versions).raw
+    if len(versions) >= 1:
+        if update:
+            version = versions[0].raw
+        else:
+            version = ChooseVersionDialog.getVersion(hou.qt.mainWindow(), versions).raw
 
     zip_file = downloadRepoZipArchive(repo_data, version)
-    package_location = extractRepoZip(zip_file, repo_data, dst_location)
+    if update:
+        dst_location, dst_name = os.path.split(package.content_path)
+        package_location = extractRepoZip(zip_file, repo_data, dst_location, dst_name)
+    else:
+        package_location = extractRepoZip(zip_file, repo_data, dst_location)
     os.remove(zip_file)
     if len(versions) == 0:
         version = repo_data['pushed_at']
-    updatePackageDataFile(repo_data, web_package, package_location, version, version_type)
-    LocalPackage.install(package_location)
+    updatePackageDataFile(repo_data, package, package_location, version, version_type, update)
+    if not update:
+        LocalPackage.install(package_location)
 
 
 def parseTimestamp(timestamp_string):

@@ -171,6 +171,7 @@ class LocalPackage:
         self.hversion = data.get(u'hversion')
         self.hlicense = fullHoudiniLicenseName(data.get(u'hlicense'))
         self.status = fullPackageStatusName(data.get(u'status'))
+        self.setup_scheme = data.get(u'setup_scheme')
 
     def files(self, extensions, root='', ignore_folders=True, recursive=False):
         if not os.path.isdir(self.content_path):

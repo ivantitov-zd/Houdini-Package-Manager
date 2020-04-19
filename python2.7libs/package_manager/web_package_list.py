@@ -26,28 +26,31 @@ class WebPackageListModel(QAbstractListModel):
         self.__data = ()
         self.updateData()
 
-    def updateData(self):
+    def updateData(self, packages=None):
         self.beginResetModel()
-        data = requests.get('https://raw.githubusercontent.com/anvdev/'
-                            'Houdini-Package-List/master/data.json').json()
-        items = []
         hversion = Version(hou.applicationVersionString())
-        for name, package_data in sorted(data.items(), key=itemgetter(0)):
-            # if not package_data.get('visible', True):
-            #     continue
-            if hversion not in VersionRange.fromPattern(package_data.get('hversion', '*')):
-                continue
-            items.append(WebPackage(
-                name,
-                package_data.get('description'),
-                package_data.get('author'),
-                package_data['source'],
-                package_data['source_type'],
-                package_data.get('hversion'),
-                package_data.get('hlicense'),
-                package_data.get('status'),
-                package_data.get('setup_scheme')
-            ))
+        items = []
+        if packages:
+            items = packages
+        else:
+            data = requests.get('https://raw.githubusercontent.com/anvdev/'
+                                'Houdini-Package-List/master/data.json').json()
+            for name, package_data in sorted(data.items(), key=itemgetter(0)):
+                if not package_data.get('visible', True):
+                    continue
+                if hversion not in VersionRange.fromPattern(package_data.get('hversion', '*')):
+                    continue
+                items.append(WebPackage(
+                    name,
+                    package_data.get('description'),
+                    package_data.get('author'),
+                    package_data['source'],
+                    package_data['source_type'],
+                    package_data.get('hversion'),
+                    package_data.get('hlicense'),
+                    package_data.get('status'),
+                    package_data.get('setup_scheme')
+                ))
         self.__data = tuple(items)
         self.endResetModel()
 

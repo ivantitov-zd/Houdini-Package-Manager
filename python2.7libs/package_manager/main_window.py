@@ -27,6 +27,7 @@ class MainWindow(QWidget):
         super(MainWindow, self).__init__(parent, Qt.Window)
 
         self.setWindowTitle('Package Manager')
+        self.setWindowIcon(hou.qt.Icon('MISC_conductor', 16, 16))
         self.resize(600, 450)
 
         main_layout = QVBoxLayout(self)
