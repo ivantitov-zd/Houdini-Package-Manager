@@ -218,11 +218,10 @@ def updatePackageDataFile(repo_data, package, package_location,
         data['source'] = package.source or repo_data['full_name']
     if not data.get('source_type'):
         data['source_type'] = package.source_type or 'github'
-    if not data.get('version') or update:
+    # Todo: or Version(data['version']) < version  # consider type
+    if update or not data.get('version') or not data.get('version_type'):
         data['version'] = version
         data['version_type'] = version_type
-    elif not data.get('version_type'):
-        data['version_type'] = package.version_type
     if not data.get('hversion') or update:
         data['hversion'] = package.hversion or '*'
     if not data.get('hlicense'):
@@ -321,6 +320,8 @@ def repoHasUpdate(link, version, version_type, only_stable=True):
                 if not release_data['prerelease']:
                     release_index = index
                     break
+            else:
+                return False
 
         latest_version = Version(releases_data[release_index]['tag_name'])
 

@@ -33,8 +33,9 @@ class WebPackageListModel(QAbstractListModel):
         if packages:
             items = packages
         else:
-            data = requests.get('https://raw.githubusercontent.com/anvdev/'
-                                'Houdini-Package-List/master/data.json').json()
+            r = requests.get('https://raw.githubusercontent.com/anvdev/'
+                             'Houdini-Package-List/master/data.json')
+            data = json.loads(r.text)
             for name, package_data in sorted(data.items(), key=itemgetter(0)):
                 if not package_data.get('visible', True):
                     continue
