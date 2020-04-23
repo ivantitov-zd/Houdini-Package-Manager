@@ -303,6 +303,7 @@ def repoHasUpdate(link, version, version_type, only_stable=True):
     if version_type == 'time_github':
         repo_data = GitHubAPICache.get(repo_api_url)
         latest_version = parseTimestamp(repo_data['pushed_at'])
+        version = parseTimestamp(version)
         # Todo: support only_stable
     else:
         releases_api_url = repo_api_url + '/releases'

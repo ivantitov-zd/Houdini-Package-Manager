@@ -54,6 +54,8 @@ class UpdateDialog(QDialog):
 
         self.update_changes_label = QLabel()
         self.update_changes_label.setWordWrap(True)
+        # Todo: scroll area
+        self.update_changes_label.setMaximumHeight(800)
         form_layout.addRow('Changes', self.update_changes_label)
 
         buttons_layout = QHBoxLayout()
