@@ -5,6 +5,7 @@ import hou
 
 from .houdini_license import fullHoudiniLicenseName
 from .package_status import fullPackageStatusName
+from .package import Package
 
 
 class NotPackageError(IOError):
@@ -139,7 +140,7 @@ def findFiles(path, ignore_folders=True, recursive=False):
             break
 
 
-class LocalPackage:
+class LocalPackage(Package):
     def __init__(self, package_file):
         self.package_file = os.path.normpath(package_file).replace('\\', '/')
 

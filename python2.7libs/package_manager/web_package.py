@@ -1,4 +1,7 @@
-class WebPackage:
+from .package import Package
+
+
+class WebPackage(Package):
     def __init__(self, name=None, description=None, author=None, source=None, source_type=None,
                  hversion=None, hlicense=None, status=None, setup_scheme=None):
         self.name = name

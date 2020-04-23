@@ -9,12 +9,85 @@
             <parent>edit_menu</parent>
             <insertAfter>h.aliases</insertAfter>
             <scriptCode>
-import package_manager.main_window as mw
+from package_manager import MainWindow
 
-window = mw.MainWindow(hou.qt.mainWindow())
+window = MainWindow(hou.qt.mainWindow())
 window.show()
             </scriptCode>
         </addScriptItem>
+
+        <!-- =========================== Packages Menu =========================== -->
+
+        <subMenu id="packages_menu">
+            <label>Packages</label>
+            <insertAfter>assets_menu</insertAfter>
+
+            <scriptItem id="h.packages_install_local">
+                <label>Install Local...</label>
+                <scriptCode>
+import hdefereval
+
+from package_manager import pickAndInstallPackageFromFolder
+
+hdefereval.executeDeferred(lambda: pickAndInstallPackageFromFolder(hou.qt.mainWindow()))
+                </scriptCode>
+            </scriptItem>
+
+            <scriptItem id="h.packages_install_web">
+                <label>Install Web...</label>
+                <scriptCode>
+import hdefereval
+
+from package_manager import installPackageFromWebLink
+
+hdefereval.executeDeferred(lambda: installPackageFromWebLink(hou.qt.mainWindow()))
+                </scriptCode>
+            </scriptItem>
+
+            <separatorItem/>
+
+            <scriptItem id="h.packages_manager">
+                <label>Package Manager...</label>
+                <scriptCode>
+from package_manager import MainWindow
+
+window = MainWindow(hou.qt.mainWindow())
+window.show()
+                </scriptCode>
+            </scriptItem>
+
+            <scriptItem id="h.packages_check_for_updates">
+                <label>Check for Updates...</label>
+                <scriptCode>
+import hdefereval
+
+from package_manager import checkForUpdates
+
+hdefereval.executeDeferred(lambda: checkForUpdates(ignore_options=True))
+                </scriptCode>
+            </scriptItem>
+
+            <separatorItem/>
+
+            <scriptItem id="h.packages_github">
+                <label>Visit on GitHub...</label>
+                <scriptCode>
+import webbrowser
+
+webbrowser.open('https://github.com/Houdini-Packages/Houdini-Package-Manager')
+                </scriptCode>
+            </scriptItem>
+
+            <scriptItem id="h.packages_docs">
+                <label>Documentation...</label>
+                <scriptCode>
+desktop = hou.ui.curDesktop()
+desktop.displayHelpPath('/ref/windows/package_manager')
+desktop.displayHelpPath('/ref/plugins')
+                </scriptCode>
+            </scriptItem>
+
+        </subMenu>
 
     </menuBar>
 </mainMenu>

@@ -87,7 +87,7 @@ class WebPackageInfoView(QWidget):
             self.install_button.setDisabled(True)
             return
         self.name_label.setText(self.web_package.name)
-        self.desc_label.setText(self.web_package.description or '-')
+        self.desc_label.setText(self.web_package.description or github.repoDescription(self.web_package) or '-')
         self.author_label.setText(self.web_package.author or '-')
         self.hversion_label.setText(self.web_package.hversion or '*')
         self.hlicense_label.setText(fullHoudiniLicenseName(self.web_package.hlicense) or 'Commercial')
@@ -106,9 +106,10 @@ class WebPackageInfoView(QWidget):
 
     def _onInstall(self):
         if self.web_package.source_type == 'github':
-            github.installFromRepo(self.web_package)
+            if not github.installFromRepo(self.web_package):
+                return  # Cancelled
         self.web_package = None
         self.updateFromCurrentPackage()
         hou.ui.setStatusMessage('Successfully installed',
                                 hou.severityType.ImportantMessage)
-        self.installed.emit()
+        self.installed.emit(self.web_package)

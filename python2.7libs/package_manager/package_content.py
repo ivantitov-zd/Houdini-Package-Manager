@@ -15,6 +15,7 @@ from .link_label import LinkLabel
 from .path_text import preparePath
 from .shelves import definitionsInFile
 from . import github
+from .update_options import UpdateOptions
 
 
 class IconCache:
@@ -109,15 +110,15 @@ class PackageInfoView(QWidget):
         update_layout.setSpacing(4)
         self.update_group.setLayout(update_layout)
 
-        check_updates_on_startup_toggle = QCheckBox('Check on Startup')
-        update_layout.addWidget(check_updates_on_startup_toggle)
+        self.check_updates_on_startup_toggle = QCheckBox('Check on Startup')
+        self.check_updates_on_startup_toggle.toggled.connect(self._onToggleCheckUpdate)
+        update_layout.addWidget(self.check_updates_on_startup_toggle)
 
-        self.user_choice_update_radio = QRadioButton('User Choice')
-        # self.user_choice_update_radio.setChecked(True)
-        update_layout.addWidget(self.user_choice_update_radio)
+        self.check_only_stable_toggle = QCheckBox('Only Stable Releases')
+        self.check_only_stable_toggle.toggled.connect(self._onToggleCheckOnlyStable)
+        update_layout.addWidget(self.check_only_stable_toggle)
 
-        self.update_automatically_radio = QRadioButton('Update Automatically')
-        update_layout.addWidget(self.update_automatically_radio)
+        # Todo: update button
 
         # Enable/Disable
         self.enable_button = QPushButton('Enable')
@@ -168,7 +169,7 @@ class PackageInfoView(QWidget):
             self.source_label.setText('')
             self.source_label.setLink(None)
             self.state_label.setText('')
-            self.update_group.setDisabled(True)
+            self.update_group.hide()
             self.enable_button.setDisabled(True)
             self.disable_button.hide()
             self.uninstall_button.setDisabled(True)
@@ -191,6 +192,20 @@ class PackageInfoView(QWidget):
         else:
             self.source_label.setText('-')
             self.source_label.setLink(None)
+        if self.__package.source and self.__package.source_type and self.__package.version:
+            check = UpdateOptions().checkOnStartupForPackage(self.__package)
+            self.check_updates_on_startup_toggle.blockSignals(True)
+            self.check_updates_on_startup_toggle.setChecked(check)
+            self.check_updates_on_startup_toggle.blockSignals(False)
+
+            only_stable = UpdateOptions().onlyStableForPackage(self.__package)
+            self.check_only_stable_toggle.blockSignals(True)
+            self.check_only_stable_toggle.setChecked(only_stable)
+            self.check_only_stable_toggle.blockSignals(False)
+
+            self.update_group.show()
+        else:
+            self.update_group.hide()
         if self.__package.isEnabled():
             self.state_label.setText('Enabled')
             self.enable_button.hide()
@@ -208,6 +223,12 @@ class PackageInfoView(QWidget):
     def setPackage(self, package):
         self.__package = package
         self.updateFromCurrentPackage()
+
+    def _onToggleCheckUpdate(self, state):
+        UpdateOptions().setCheckOnStartupForPackage(self.__package, state)
+
+    def _onToggleCheckOnlyStable(self, state):
+        UpdateOptions().setOnlyStableForPackage(self.__package, state)
 
     def _onEnable(self):
         self.__package.enable(True)

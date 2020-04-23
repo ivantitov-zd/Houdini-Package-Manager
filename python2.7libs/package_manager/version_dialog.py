@@ -8,9 +8,9 @@ except ImportError:
     from PySide2.QtCore import *
 
 
-class ChooseVersionDialog(QDialog):
+class VersionDialog(QDialog):
     def __init__(self, parent=None):
-        super(ChooseVersionDialog, self).__init__(parent)
+        super(VersionDialog, self).__init__(parent)
 
         self.setWindowTitle('Choose version')
 

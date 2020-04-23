@@ -7,12 +7,16 @@ except ImportError:
     from PySide2.QtGui import *
     from PySide2.QtCore import *
 
+import hou
+
+from . import github
+
 
 class InstallFromWebLinkDialog(QDialog):
     def __init__(self, parent=None):
         super(InstallFromWebLinkDialog, self).__init__(parent)
 
-        self.setWindowTitle('Install from Web Link')
+        self.setWindowTitle('Package Manager: Install from Web Link')
         self.resize(500, 50)
 
         main_layout = QVBoxLayout(self)
@@ -42,15 +46,30 @@ class InstallFromWebLinkDialog(QDialog):
         spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Ignored)
         buttons_layout.addSpacerItem(spacer)
 
-        ok_button = QPushButton('OK')
-        ok_button.clicked.connect(self.accept)
-        buttons_layout.addWidget(ok_button)
+        self.ok_button = QPushButton('OK')
+        self.ok_button.clicked.connect(self.accept)
+        buttons_layout.addWidget(self.ok_button)
+        self.web_link_field.textChanged.connect(self.updateButtonState)
+        self.updateButtonState()
 
         cancel_button = QPushButton('Cancel')
         cancel_button.clicked.connect(self.reject)
         buttons_layout.addWidget(cancel_button)
 
+    def updateButtonState(self):
+        path = self.web_link_field.text()
+        self.ok_button.setEnabled(bool(path))
+
     @classmethod
     def getInstallationData(cls, parent=None):
         dialog = cls(parent)
         return dialog.exec_(), dialog.web_link_field.text()
+
+
+def installPackageFromWebLink(parent=None):
+    ok, link = InstallFromWebLinkDialog.getInstallationData(parent)
+    if ok and link:
+        github.installFromRepo(link)
+        hou.ui.setStatusMessage('Successfully installed',
+                                hou.severityType.ImportantMessage)
+        return True

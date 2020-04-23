@@ -9,7 +9,7 @@ except ImportError:
 
 import hou
 
-from . import github
+from .update_options import UpdateOptions
 
 
 class SettingsWidget(QWidget):
@@ -17,16 +17,43 @@ class SettingsWidget(QWidget):
         super(SettingsWidget, self).__init__()
 
         # Layout
-        layout = QFormLayout(self)
-        layout.setContentsMargins(4, 4, 4, 4)
-        layout.setSpacing(4)
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(4, 4, 4, 4)
+        main_layout.setSpacing(4)
 
-        # Cache
-        self.web_cache_size = QLabel()  # Todo: calc cache size (API, archives)
-        self.clear_web_cache_button = QPushButton('Clear Web Cache')
-        self.clear_web_cache_button.clicked.connect(github.GitHubAPICache.clear)
-        layout.addRow(self.web_cache_size, self.clear_web_cache_button)
+        # Updating
+        self.check_on_startup_toggle = QCheckBox('Check for updates on startup')
+        self.check_on_startup_toggle.toggled.connect(UpdateOptions().setCheckOnStartup)
+        main_layout.addWidget(self.check_on_startup_toggle)
 
-        # Installation
-        self.path_field = QLineEdit('$HOUDINI_USER_PREF_DIR')
-        layout.addRow('Installation path', self.path_field)
+        self.updateSettings()
+
+        spacer = QSpacerItem(0, 10, QSizePolicy.Ignored, QSizePolicy.Expanding)
+        main_layout.addSpacerItem(spacer)
+
+        # form_layout = QFormLayout()
+        # form_layout.setContentsMargins(0, 0, 0, 0)
+        # form_layout.setSpacing(4)
+        # form_layout.setHorizontalSpacing(8)
+        # main_layout.addLayout(form_layout)
+
+        # # Installation
+        # self.path_field = QLineEdit('$HOUDINI_USER_PREF_DIR')
+        # form_layout.addRow('Installation Path', self.path_field)
+        #
+        # buttons_layout = QHBoxLayout()
+        # main_layout.addLayout(buttons_layout)
+        #
+        # spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Ignored)
+        # buttons_layout.addSpacerItem(spacer)
+        #
+        # save_button = QPushButton('Save')
+        # buttons_layout.addWidget(save_button)
+        #
+        # revert_button = QPushButton('Revert')
+        # buttons_layout.addWidget(revert_button)
+
+    def updateSettings(self):
+        self.check_on_startup_toggle.blockSignals(True)
+        self.check_on_startup_toggle.setChecked(UpdateOptions().checkOnStartup())
+        self.check_on_startup_toggle.blockSignals(False)

@@ -9,7 +9,7 @@ except ImportError:
 
 import hou
 
-from .web_package_list import WebPackageListModel, WebPackageListView
+from .update_list import UpdateListModel, UpdateListView
 from . import github
 
 
@@ -17,12 +17,10 @@ class UpdateDialog(QDialog):
     def __init__(self, parent=None):
         super(UpdateDialog, self).__init__(parent)
 
-        self.flags = {}
-
-        self.setWindowTitle('Updates here!')
-        self.setWindowIcon(hou.qt.Icon('IMAGE_auto_update', 16, 16))
+        self.setWindowTitle('Package Manager: Updates')
+        self.setWindowIcon(hou.qt.Icon('IMAGE_auto_update', 32, 32))
         self.setStyleSheet(hou.qt.styleSheet())
-        self.resize(500, 400)
+        self.resize(600, 400)
 
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(4, 4, 4, 4)
@@ -33,9 +31,9 @@ class UpdateDialog(QDialog):
         middle_layout.setSpacing(4)
         main_layout.addLayout(middle_layout)
 
-        self.web_list_model = WebPackageListModel(self)
+        self.web_list_model = UpdateListModel(self)
 
-        self.web_list_view = WebPackageListView()
+        self.web_list_view = UpdateListView()
         self.web_list_view.setModel(self.web_list_model)
         self.web_list_view.setFixedWidth(120)
         selection_model = self.web_list_view.selectionModel()
@@ -48,12 +46,11 @@ class UpdateDialog(QDialog):
         form_layout.setHorizontalSpacing(8)
         middle_layout.addLayout(form_layout)
 
-        self.skip_toggle = QCheckBox('Skip')
-        self.skip_toggle.stateChanged.connect(self._changeFlag)
-        form_layout.addRow('Update', self.skip_toggle)
-
         self.current_version_label = QLabel()
         form_layout.addRow('Current version', self.current_version_label)
+
+        self.new_version_label = QLabel()
+        form_layout.addRow('New version', self.new_version_label)
 
         self.update_changes_label = QLabel()
         self.update_changes_label.setWordWrap(True)
@@ -65,13 +62,14 @@ class UpdateDialog(QDialog):
         spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Ignored)
         buttons_layout.addSpacerItem(spacer)
 
-        update_selected_button = QPushButton('Update Selected')
-        update_selected_button.clicked.connect(self.accept)
-        buttons_layout.addWidget(update_selected_button)
+        update_button = QPushButton('Update Selected')
+        update_button.clicked.connect(self.accept)
+        buttons_layout.addWidget(update_button)
 
-        cancel_button = QPushButton('Cancel')
-        cancel_button.clicked.connect(self.reject)
-        buttons_layout.addWidget(cancel_button)
+        skip_button = QPushButton('Skip Updating')
+        skip_button.setToolTip('Skipidi-pa-pa')
+        skip_button.clicked.connect(self.reject)
+        buttons_layout.addWidget(skip_button)
 
         self.package = None
 
@@ -79,14 +77,13 @@ class UpdateDialog(QDialog):
         package = index.data(Qt.UserRole)
         self.package = package
         self.current_version_label.setText(package.version)
-
         if package.source_type == 'github':
             releases_api_url = 'https://api.github.com/repos/{0}/{1}/releases'.format(*github.ownerAndRepoName(package.source))
-            changes = github.GitHubAPICache.get(releases_api_url)[0]['body']
+            last_version_data = github.GitHubAPICache.get(releases_api_url)[0]
+            new_version = last_version_data['tag_name']
+            self.new_version_label.setText(new_version)
+            changes = last_version_data['body']
             self.update_changes_label.setText(changes)
-
-    def _changeFlag(self, state):
-        self.flags[self.package] = state
 
     def setPackageList(self, packages):
         self.web_list_model.updateData(packages)
@@ -95,4 +92,4 @@ class UpdateDialog(QDialog):
     def getUpdateFlags(cls, packages):
         window = cls(hou.qt.mainWindow())
         window.setPackageList(packages)
-        return window.exec_(), window.flags
+        return window.exec_(), window.web_list_model.checked

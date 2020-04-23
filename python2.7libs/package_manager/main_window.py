@@ -18,8 +18,8 @@ from .web_package_list import *
 from .web_package_content import WebPackageInfoView
 from . import github
 from .settings import SettingsWidget
-from .install_web_dialog import InstallFromWebLinkDialog
-from .install_local_dialog import InstallFromFolderPathDialog
+from .install_web import installPackageFromWebLink
+from .install_local import pickAndInstallPackageFromFolder
 
 
 class MainWindow(QWidget):
@@ -27,7 +27,7 @@ class MainWindow(QWidget):
         super(MainWindow, self).__init__(parent, Qt.Window)
 
         self.setWindowTitle('Package Manager')
-        self.setWindowIcon(hou.qt.Icon('MISC_conductor', 16, 16))
+        self.setWindowIcon(hou.qt.Icon('MISC_conductor', 32, 32))
         self.resize(600, 450)
 
         main_layout = QVBoxLayout(self)
@@ -41,7 +41,7 @@ class MainWindow(QWidget):
         main_layout.addLayout(top_layout)
 
         local_install_button = QPushButton('Install Local Package')
-        local_install_button.clicked.connect(self.pickAndInstallPackageFolder)
+        local_install_button.clicked.connect(self.pickAndInstallPackageFromFolder)
         top_layout.addWidget(local_install_button)
 
         web_install_button = QPushButton('Install Web Package')
@@ -193,20 +193,12 @@ class MainWindow(QWidget):
     def updateWebContentSource(self):
         self.web_info_view.setWebPackage(self.current_web_package)
 
-    def pickAndInstallPackageFolder(self):
-        ok, path = InstallFromFolderPathDialog.getInstallationData(self)
-        if ok and path:
-            LocalPackage.install(path)
-            hou.ui.setStatusMessage('Successfully installed',
-                                    hou.severityType.ImportantMessage)
+    def pickAndInstallPackageFromFolder(self):
+        if pickAndInstallPackageFromFolder(self):
             self.updateLocalPackageList()
 
     def installPackageFromWebLink(self):
-        ok, link = InstallFromWebLinkDialog.getInstallationData(self)
-        if ok and link:
-            github.installFromRepo(link)
-            hou.ui.setStatusMessage('Successfully installed',
-                                    hou.severityType.ImportantMessage)
+        if installPackageFromWebLink(self):
             self.updateLocalPackageList()
 
     def _setCurrentPackage(self, index):
