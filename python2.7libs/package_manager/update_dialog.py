@@ -52,10 +52,13 @@ class UpdateDialog(QDialog):
         self.new_version_label = QLabel()
         form_layout.addRow('New version', self.new_version_label)
 
-        self.update_changes_label = QLabel()
-        self.update_changes_label.setWordWrap(True)
-        # Todo: scroll area
-        self.update_changes_label.setMaximumHeight(800)
+        self.update_changes_label = QTextEdit()
+        size_policy = self.update_changes_label.sizePolicy()
+        size_policy.setVerticalStretch(1)
+        self.update_changes_label.setSizePolicy(size_policy)
+        self.update_changes_label.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.update_changes_label.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.update_changes_label.setReadOnly(True)
         form_layout.addRow('Changes', self.update_changes_label)
 
         buttons_layout = QHBoxLayout()
