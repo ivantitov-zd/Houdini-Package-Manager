@@ -52,7 +52,7 @@ class WebPackageListModel(QAbstractListModel):
                     package_data.get('hversion'),
                     package_data.get('hlicense'),
                     package_data.get('status'),
-                    package_data.get('setup_scheme')
+                    package_data.get('setup_schema')
                 ))
         self.__data = tuple(items)
         self.endResetModel()

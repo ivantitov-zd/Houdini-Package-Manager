@@ -1,9 +1,11 @@
+from __future__ import print_function
+
 from .package import Package
 
 
 class WebPackage(Package):
     def __init__(self, name=None, description=None, author=None, source=None, source_type=None,
-                 hversion=None, hlicense=None, status=None, setup_scheme=None):
+                 hversion=None, hlicense=None, status=None, setup_schema=None):
         self.name = name
         self.description = description
         self.author = author
@@ -16,4 +18,4 @@ class WebPackage(Package):
 
         self.status = status
 
-        self.setup_scheme = setup_scheme
+        self.setup_schema = setup_schema

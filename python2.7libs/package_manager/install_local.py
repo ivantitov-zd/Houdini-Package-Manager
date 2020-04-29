@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 
 try:
@@ -71,9 +73,9 @@ class InstallFromFolderPathDialog(QDialog):
         self.folder_path_field = FolderField()
         form_layout.addRow('Folder Path', self.folder_path_field)
 
-        self.setup_scheme_combo = QComboBox()
-        self.setup_scheme_combo.setDisabled(True)
-        form_layout.addRow('Setup Scheme', self.setup_scheme_combo)
+        self.setup_schema_combo = QComboBox()
+        self.setup_schema_combo.setDisabled(True)
+        form_layout.addRow('Setup Schema', self.setup_schema_combo)
 
         buttons_layout = QHBoxLayout()
         main_layout.addLayout(buttons_layout)

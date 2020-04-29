@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 try:
     from PyQt5.QtWidgets import *
     from PyQt5.QtGui import *
@@ -72,7 +74,6 @@ class UpdateDialog(QDialog):
         buttons_layout.addWidget(update_button)
 
         skip_button = QPushButton('Skip Updating')
-        skip_button.setToolTip('Skipidi-pa-pa')
         skip_button.clicked.connect(self.reject)
         buttons_layout.addWidget(skip_button)
 
@@ -84,10 +85,17 @@ class UpdateDialog(QDialog):
         self.current_version_label.setText(package.version)
         if package.source_type == 'github':
             releases_api_url = 'https://api.github.com/repos/{0}/{1}/releases'.format(*github.ownerAndRepoName(package.source))
-            last_version_data = github.GitHubAPICache.get(releases_api_url)[0]
-            new_version = last_version_data['tag_name']
+            releases_data = github.API.get(releases_api_url)
+            if releases_data:
+                last_version_data = releases_data[0]
+                new_version = last_version_data['tag_name']
+                changes = last_version_data['body']
+            else:
+                repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(*github.ownerAndRepoName(package.source))
+                repo_data = github.API.get(repo_api_url)
+                new_version = repo_data['pushed_at']
+                changes = ''
             self.new_version_label.setText(new_version)
-            changes = last_version_data['body']
             self.update_changes_label.setText(changes)
 
     def setPackageList(self, packages):

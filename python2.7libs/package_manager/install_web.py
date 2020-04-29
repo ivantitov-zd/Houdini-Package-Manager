@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 try:
     from PyQt5.QtWidgets import *
     from PyQt5.QtGui import *
@@ -36,9 +38,9 @@ class InstallFromWebLinkDialog(QDialog):
         self.web_link_field.setPlaceholderText('https://github.com/Houdini-Packages/Houdini-Package-Manager')
         form_layout.addRow('Web Link', self.web_link_field)
 
-        self.setup_scheme_combo = QComboBox()
-        self.setup_scheme_combo.setDisabled(True)
-        form_layout.addRow('Setup Scheme', self.setup_scheme_combo)
+        self.setup_schema_combo = QComboBox()
+        self.setup_schema_combo.setDisabled(True)
+        form_layout.addRow('Setup Schema', self.setup_schema_combo)
 
         buttons_layout = QHBoxLayout()
         main_layout.addLayout(buttons_layout)

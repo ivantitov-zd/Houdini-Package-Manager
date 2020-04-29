@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import hou
 
 HOUDINI_COMMERCIAL_LICENSE = hou.licenseCategoryType.Commercial

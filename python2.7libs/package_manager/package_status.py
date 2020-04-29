@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 DEVELOPMENT = 0
 PROTOTYPE = 1
 ALPHA = 2

@@ -95,10 +95,10 @@ class MainWindow(QWidget):
         main_layout.addLayout(self.stack_layout)
 
         # Local
-        local = QWidget()
-        self.stack_layout.addWidget(local)
+        local_widget = QWidget()
+        self.stack_layout.addWidget(local_widget)
 
-        local_layout = QVBoxLayout(local)
+        local_layout = QVBoxLayout(local_widget)
         local_layout.setContentsMargins(0, 0, 0, 0)
         local_layout.setSpacing(0)
 
@@ -142,10 +142,10 @@ class MainWindow(QWidget):
         self.package_content_tabs.addTab(panel_list_view, 'Python Panels')
 
         # Web
-        web = QWidget()
-        self.stack_layout.addWidget(web)
+        web_widget = QWidget()
+        self.stack_layout.addWidget(web_widget)
 
-        web_layout = QVBoxLayout(web)
+        web_layout = QVBoxLayout(web_widget)
         web_layout.setContentsMargins(0, 0, 0, 0)
         web_layout.setSpacing(0)
 
@@ -211,5 +211,5 @@ class MainWindow(QWidget):
         self.current_web_package = web_package
         self.updateWebContentSource()
 
-    def switchMode(self, button_id):
-        self.stack_layout.setCurrentIndex(button_id)
+    def switchMode(self, mode_id):
+        self.stack_layout.setCurrentIndex(mode_id)

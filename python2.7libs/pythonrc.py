@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 if hou.isUIAvailable():
     from time import time
 
@@ -5,7 +7,6 @@ if hou.isUIAvailable():
 
     options = UpdateOptions()
     current_time = time()
-    # It should be over 2 hours since the last check.
-    if options.checkOnStartup() and current_time - options.lastCheckTime() > 7200:
+    # It should be over 4 hours since the last check.
+    if options.checkOnStartup() and current_time - options.lastCheckTime() > 14400:
         checkForUpdates()
-        options.setLastCheckTime(current_time)

@@ -11,7 +11,8 @@ import datetime
 import hou
 import requests
 
-from .local_package import isPackage, NotPackageError, LocalPackage
+from .local_package import NotPackageError, LocalPackage
+from package_manager.package import isPackage
 from .houdini_license import fullHoudiniLicenseName, HOUDINI_COMMERCIAL_LICENSE
 from .version_dialog import VersionDialog
 from .version import Version
@@ -19,7 +20,7 @@ from .web_package import WebPackage
 from .package import Package
 
 
-class RepoNotFound(Exception):
+class RepoNotFound(IOError):
     pass
 
 
@@ -47,7 +48,7 @@ class CacheItem:
         return cls(data['data'], data.get('etag'), data.get('last_modified'))
 
 
-class GitHubAPICache:
+class API:
     cache_data = {}
 
     @staticmethod
@@ -63,12 +64,12 @@ class GitHubAPICache:
             headers_data.update(headers)
 
         try:
-            GitHubAPICache.loadFromFile()
+            API.loadFromFile()
         except IOError:
             pass
 
-        if url in GitHubAPICache.cache_data:
-            cached_item = GitHubAPICache.cache_data[url]
+        if url in API.cache_data:
+            cached_item = API.cache_data[url]
             if cached_item.etag:
                 headers_data['If-None-Match'] = cached_item.etag
             elif cached_item.last_modified:
@@ -76,81 +77,52 @@ class GitHubAPICache:
 
         r = requests.get(url, stream=True, headers=headers_data, timeout=timeout)
 
+        if os.getenv('username') == 'MarkWilson':  # Debug only
+            print(r.headers.get('X-RateLimit-Remaining'))
+
         if r.status_code == 200:
             data = json.loads(r.text)
             etag = r.headers.get('ETag')
             last_modified = r.headers.get('Last-Modified')
-            GitHubAPICache.cache_data[url] = CacheItem(data, etag, last_modified)
-            GitHubAPICache.saveToFile()
+            API.cache_data[url] = CacheItem(data, etag, last_modified)
+            API.saveToFile()
             return data
         elif r.status_code == 304:
-            return GitHubAPICache.cache_data[url].data
+            return API.cache_data[url].data
         elif r.status_code == 403:
             raise ReachedAPILimit
         elif r.status_code == 404:
             raise RepoNotFound  # Todo: explainable message
 
-    # @staticmethod
-    # def post(query):
-    #     """Test only, don't use in production"""
-    #     headers = {'Authorization': 'Bearer 008d86db69e83cef0e1df1d2d3691b6efcc28be6'}
-    #     r = requests.post('https://api.github.com/graphql', json={'query': query}, headers=headers)
-    #     print(r.text)
-
     @staticmethod
     def toJson():
-        return {url: item.toJson() for url, item in GitHubAPICache.cache_data.items()}
+        return {url: item.toJson() for url, item in API.cache_data.items()}
 
     @staticmethod
     def fromJson(data):
         for url, item_data in data.items():
-            GitHubAPICache.cache_data[url] = CacheItem.fromJson(item_data)
+            API.cache_data[url] = CacheItem.fromJson(item_data)
 
     @staticmethod
     def saveToFile():
         file_path = hou.expandString('$HOUDINI_USER_PREF_DIR/package_manager.github_api_cache')
         with open(file_path, 'w') as file:
-            json.dump(GitHubAPICache.toJson(), file)
+            json.dump(API.toJson(), file)
 
     @staticmethod
     def loadFromFile():
         file_path = hou.expandString('$HOUDINI_USER_PREF_DIR/package_manager.github_api_cache')
         with open(file_path) as file:
-            GitHubAPICache.fromJson(json.load(file))
+            API.fromJson(json.load(file))
 
     @staticmethod
     def clear():
-        GitHubAPICache.cache_data = {}
-        GitHubAPICache.saveToFile()
+        API.cache_data = {}
+        API.saveToFile()
 
     @staticmethod
     def cacheSize():
         raise NotImplementedError
-
-
-# class Release:
-#     def __init__(self, release_data):
-#         self.__data = release_data
-#
-#     @property
-#     def version(self):
-#         return self.__data.get('tag_name')
-#
-#     @property
-#     def name(self):
-#         return self.__data.get('name')
-#
-#     @property
-#     def changes(self):
-#         return self.__data.get('body')
-#
-#     @property
-#     def is_stable(self):
-#         return not self.__data.get('prerelease')
-#
-#     @property
-#     def zip_archive_url(self):
-#         return self.__data.get('zipball_url')
 
 
 def ownerAndRepoName(source):
@@ -164,7 +136,7 @@ def repoURL(owner, repo_name):
 def isPackageRepo(source):
     repo_owner, repo_name = ownerAndRepoName(source)
     api_repo_url = 'https://api.github.com/repos/{0}/{1}/contents'.format(repo_owner, repo_name)
-    repo_content = GitHubAPICache.get(api_repo_url)
+    repo_content = API.get(api_repo_url)
     items = tuple(file_data['name'] for file_data in repo_content)
     return isPackage(items)
 
@@ -188,7 +160,7 @@ def extractRepoZip(file_path, repo_data, dst_location='$HOUDINI_USER_PREF_DIR', 
 
 
 def ownerName(login):
-    return GitHubAPICache.get('https://api.github.com/users/' + login).get('name', login)
+    return API.get('https://api.github.com/users/' + login).get('name', login)
 
 
 def repoDescription(package_or_link):
@@ -196,7 +168,7 @@ def repoDescription(package_or_link):
         repo_owner, repo_name = ownerAndRepoName(package_or_link.source)
     else:  # package_or_link is link
         repo_owner, repo_name = ownerAndRepoName(package_or_link)
-    return GitHubAPICache.get('https://api.github.com/repos/{0}/{1}'.format(repo_owner, repo_name)).get('description')
+    return API.get('https://api.github.com/repos/{0}/{1}'.format(repo_owner, repo_name)).get('description')
 
 
 def updatePackageDataFile(repo_data, package, package_location,
@@ -229,8 +201,8 @@ def updatePackageDataFile(repo_data, package, package_location,
                            fullHoudiniLicenseName(HOUDINI_COMMERCIAL_LICENSE)
     if not data.get('status') or update:
         data['status'] = package.status or 'Stable'
-    if not data.get('setup_scheme') or update:
-        data['setup_scheme'] = package.setup_scheme
+    if not data.get('setup_schema') or update:
+        data['setup_schema'] = package.setup_schema
     with open(data_file_path, 'w') as file:
         json.dump(data, file, indent=4, encoding='utf-8')
 
@@ -256,12 +228,12 @@ def installFromRepo(package_or_link, dst_location='$HOUDINI_USER_PREF_DIR', upda
         package = None
 
     repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(repo_owner, repo_name)
-    repo_data = GitHubAPICache.get(repo_api_url)
+    repo_data = API.get(repo_api_url)
 
     version = None
     releases_api_url = repo_api_url + '/releases'
     versions = []
-    for release_data in GitHubAPICache.get(releases_api_url):
+    for release_data in API.get(releases_api_url):
         if only_stable and release_data['prerelease']:
             continue
         versions.append(Version(release_data['tag_name']))
@@ -301,13 +273,13 @@ def repoHasUpdate(link, version, version_type, only_stable=True):
 
     repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(repo_owner, repo_name)
     if version_type == 'time_github':
-        repo_data = GitHubAPICache.get(repo_api_url)
+        repo_data = API.get(repo_api_url)
         latest_version = parseTimestamp(repo_data['pushed_at'])
         version = parseTimestamp(version)
         # Todo: support only_stable
     else:
         releases_api_url = repo_api_url + '/releases'
-        releases_data = GitHubAPICache.get(releases_api_url)
+        releases_data = API.get(releases_api_url)
 
         if not releases_data:
             return False
