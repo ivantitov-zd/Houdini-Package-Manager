@@ -8,6 +8,7 @@ import hou
 from .houdini_license import fullHoudiniLicenseName
 from .package_status import fullPackageStatusName
 from .package import Package, isPackage
+from .setup_schema import makeSetupSchema
 
 
 class NotPackageError(IOError):
@@ -37,6 +38,10 @@ def packageNameFromContent(content_path):
         name = data.get('name')
     if name is None:
         name = os.path.basename(content_path)
+        if name.endswith('-master') and len(name) > 7:
+            name = name[:-7]
+        elif name.endswith('-dev') and len(name) > 4:
+            name = name[:-4]
     return name
 
 
@@ -132,19 +137,36 @@ class LocalPackage(Package):
             json.dump(data, file, indent=4, encoding='utf-8')
 
     @staticmethod
-    def install(content_path, enable=True, force_overwrite=False):
+    def install(content_path, enable=True, setup_schema=None):
         content_path = os.path.normpath(content_path).replace('\\', '/')
-        if not os.path.isdir(content_path) or not isPackageFolder(content_path):
-            raise NotPackageError('Folder is not a package')
+
+        if not os.path.exists(content_path) or not os.path.isdir(content_path):
+            raise FileNotFoundError('Package folder not found')
+
         name = packageNameFromContent(content_path).replace(' ', '_')
-        package_file = os.path.join(hou.expandString('$HOUDINI_USER_PREF_DIR/packages'),
-                                    name + '.json')
-        if not force_overwrite and os.path.isfile(package_file):
+        package_file = os.path.join(hou.expandString('$HOUDINI_USER_PREF_DIR/packages'), name + '.json')
+        if os.path.exists(package_file):
             raise AlreadyInstalledError('Package already installed')
-        data = {
-            u'enable': enable,
-            u'path': content_path
-        }
+
+        setup_schema = setup_schema or makeSetupSchema(content_path)
+        if not setup_schema:
+            data = {
+                u'enable': enable,
+                u'path': content_path
+            }
+        else:
+            package_root_path = os.path.join(content_path, setup_schema['root']).replace('\\', '/')
+            data = {
+                u'enable': enable,
+                u'path': package_root_path,
+                u'env': [
+                    {name.upper(): package_root_path}
+                ]
+            }
+            if 'hda_roots' in setup_schema and setup_schema['hda_roots']:
+                hda_roots_vars = {u'HOUDINI_OTLSCAN_PATH': list(map(lambda r: '${0}/{1}'.format(name.upper(), r),
+                                                                    setup_schema['hda_roots']))}
+                data[u'env'].append(hda_roots_vars)
         with open(package_file, 'w') as file:
             json.dump(data, file, indent=4, encoding='utf-8')
 

@@ -219,13 +219,13 @@ def downloadRepoZipArchive(repo_data, version=None, dst_location='$TEMP'):
     return zip_file_path
 
 
-def installFromRepo(package_or_link, dst_location='$HOUDINI_USER_PREF_DIR', update=False, only_stable=True):
+def installFromRepo(package_or_link, dst_location='$HOUDINI_USER_PREF_DIR', update=False, only_stable=True, setup_schema=None):
     if isinstance(package_or_link, Package):
         package = package_or_link
         repo_owner, repo_name = ownerAndRepoName(package.source)
     else:  # package_or_link is link
         repo_owner, repo_name = ownerAndRepoName(package_or_link)
-        package = None
+        package = WebPackage()
 
     repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(repo_owner, repo_name)
     repo_data = API.get(repo_api_url)
@@ -260,7 +260,8 @@ def installFromRepo(package_or_link, dst_location='$HOUDINI_USER_PREF_DIR', upda
     if len(versions) == 0:
         version = repo_data['pushed_at']
     updatePackageDataFile(repo_data, package, package_location, version, version_type, update)
-    LocalPackage.install(package_location, force_overwrite=update)
+    if not update:
+        LocalPackage.install(package_location, setup_schema=package.setup_schema or setup_schema)
     return True
 
 

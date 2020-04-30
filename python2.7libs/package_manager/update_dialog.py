@@ -94,7 +94,7 @@ class UpdateDialog(QDialog):
                 repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(*github.ownerAndRepoName(package.source))
                 repo_data = github.API.get(repo_api_url)
                 new_version = repo_data['pushed_at']
-                changes = ''
+                changes = 'No information'
             self.new_version_label.setText(new_version)
             self.update_changes_label.setText(changes)
 

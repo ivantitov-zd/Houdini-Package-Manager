@@ -100,13 +100,15 @@ class InstallFromFolderPathDialog(QDialog):
     @classmethod
     def getInstallationData(cls, parent=None):
         dialog = cls(parent)
-        return dialog.exec_(), dialog.folder_path_field.text()
+        return (dialog.exec_(),
+                dialog.folder_path_field.text(),
+                dialog.setup_schema_combo.currentData(Qt.UserRole))
 
 
 def pickAndInstallPackageFromFolder(parent=None):
-    ok, path = InstallFromFolderPathDialog.getInstallationData(parent)
+    ok, path, schema = InstallFromFolderPathDialog.getInstallationData(parent)
     if ok and path:
-        LocalPackage.install(path)
+        LocalPackage.install(path, setup_schema=schema)
         hou.ui.setStatusMessage('Successfully installed',
                                 hou.severityType.ImportantMessage)
         return True

@@ -5,7 +5,7 @@ class Package(object):
     pass
 
 
-def isPackage(items, level=2):
+def packageScore(items):
     XML_NAMES = ('AnimationEditorDopesheetContextMenu',
                  'AnimationEditorDopesheetMenu',
                  'AnimationEditorGraphContextMenu',
@@ -54,6 +54,8 @@ def isPackage(items, level=2):
         scores += 1
     if 'desktop' in items:
         scores += 1
+    if 'packages' in items:
+        scores += 1
     if 'radialmenu' in items:
         scores += 2
     if 'dso' in items:
@@ -93,4 +95,8 @@ def isPackage(items, level=2):
         scores += 2
     if 'PythonScripts.txt' in items:
         scores += 1
-    return scores >= level
+    return scores
+
+
+def isPackage(items, threshold=2):
+    return packageScore(items) >= threshold

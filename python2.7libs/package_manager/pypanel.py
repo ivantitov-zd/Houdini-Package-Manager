@@ -3,7 +3,7 @@ from __future__ import print_function
 from lxml import etree
 
 
-class ShelfItem:
+class PyPanelItem:
     def __init__(self, label, name, icon):
         self.__label = label
         self.__name = name
@@ -19,17 +19,17 @@ class ShelfItem:
         return self.__icon
 
 
-def definitionsInFile(file_path):
+def interfacesInFile(file_path):
     with open(file_path, 'rb') as file:
         xml_data = file.read()
-    shelves = []
+    panels = []
     try:
         root = etree.fromstring(xml_data)
-        for data in root.getiterator('tool'):
+        for data in root.getiterator('interface'):
             data = data.items()
-            shelves.append(ShelfItem(label=data[1][1],
-                                     name=data[0][1],
-                                     icon=data[2][1]))
+            panels.append(PyPanelItem(label=data[1][1],
+                                      name=data[0][1],
+                                      icon=data[2][1]))
     except etree.XMLSyntaxError:
         pass
-    return tuple(shelves)
+    return tuple(panels)

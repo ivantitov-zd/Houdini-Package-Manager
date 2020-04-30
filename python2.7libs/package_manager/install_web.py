@@ -65,13 +65,15 @@ class InstallFromWebLinkDialog(QDialog):
     @classmethod
     def getInstallationData(cls, parent=None):
         dialog = cls(parent)
-        return dialog.exec_(), dialog.web_link_field.text()
+        return (dialog.exec_(),
+                dialog.web_link_field.text(),
+                dialog.setup_schema_combo.currentData(Qt.UserRole))
 
 
 def installPackageFromWebLink(parent=None):
-    ok, link = InstallFromWebLinkDialog.getInstallationData(parent)
+    ok, link, schema = InstallFromWebLinkDialog.getInstallationData(parent)
     if ok and link:
-        github.installFromRepo(link)
+        github.installFromRepo(link, setup_schema=schema)
         hou.ui.setStatusMessage('Successfully installed',
                                 hou.severityType.ImportantMessage)
         return True

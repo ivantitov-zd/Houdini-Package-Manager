@@ -13,7 +13,7 @@ import hou
 
 from .local_package import LocalPackage, findInstalledPackages
 from .package_list import *
-from .package_content import *
+from .local_package_content import *
 from .web_package_list import *
 from .web_package_content import WebPackageInfoView
 from . import github
@@ -137,8 +137,8 @@ class MainWindow(QWidget):
         shelf_list_view.setModel(ShelfListModel(self))
         self.package_content_tabs.addTab(shelf_list_view, 'Shelf Tools')
 
-        panel_list_view = PanelListView()
-        panel_list_view.setModel(PanelListModel(self))
+        panel_list_view = PyPanelListView()
+        panel_list_view.setModel(PyPanelListModel(self))
         self.package_content_tabs.addTab(panel_list_view, 'Python Panels')
 
         # Web

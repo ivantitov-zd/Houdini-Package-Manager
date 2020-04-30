@@ -18,6 +18,7 @@ from .path_text import preparePath
 from .shelves import definitionsInFile
 from . import github
 from .update_options import UpdateOptions
+from . import pypanel
 
 
 class IconCache:
@@ -56,47 +57,67 @@ class PackageInfoView(QWidget):
         info_block_layout.setHorizontalSpacing(10)
         main_layout.addLayout(info_block_layout)
 
-        self.name_label = QLabel()
-        self.name_label.setWordWrap(True)
-        info_block_layout.addRow('Name', self.name_label)
+        name_label = QLabel('Name')
+        name_label.setAlignment(Qt.AlignTop)
+        self.name_info = QLabel()
+        self.name_info.setWordWrap(True)
+        info_block_layout.addRow(name_label, self.name_info)
 
-        self.desc_label = QLabel()
-        self.desc_label.setWordWrap(True)
-        info_block_layout.addRow('Description', self.desc_label)
+        desc_label = QLabel('Description')
+        desc_label.setAlignment(Qt.AlignTop)
+        self.desc_info = QLabel()
+        self.desc_info.setWordWrap(True)
+        info_block_layout.addRow(desc_label, self.desc_info)
 
-        self.author_label = QLabel()
-        self.author_label.setWordWrap(True)
-        info_block_layout.addRow('Author', self.author_label)
+        author_label = QLabel('Author')
+        author_label.setAlignment(Qt.AlignTop)
+        self.author_info = QLabel()
+        self.author_info.setWordWrap(True)
+        info_block_layout.addRow(author_label, self.author_info)
 
-        self.version_label = QLabel()
-        self.version_label.setWordWrap(True)
-        info_block_layout.addRow('Version', self.version_label)
+        version_label = QLabel('Version')
+        version_label.setAlignment(Qt.AlignTop)
+        self.version_info = QLabel()
+        self.version_info.setWordWrap(True)
+        info_block_layout.addRow(version_label, self.version_info)
 
-        self.hversion_label = QLabel()
-        self.hversion_label.setWordWrap(True)
-        info_block_layout.addRow('Houdini', self.hversion_label)
+        hversion_label = QLabel('Houdini')
+        hversion_label.setAlignment(Qt.AlignTop)
+        self.hversion_info = QLabel()
+        self.hversion_info.setWordWrap(True)
+        info_block_layout.addRow(hversion_label, self.hversion_info)
 
-        self.hlicense_label = QLabel()
-        self.hlicense_label.setWordWrap(True)
-        info_block_layout.addRow('License', self.hlicense_label)
+        hlicense_label = QLabel('License')
+        hlicense_label.setAlignment(Qt.AlignTop)
+        self.hlicense_info = QLabel()
+        self.hlicense_info.setWordWrap(True)
+        info_block_layout.addRow(hlicense_label, self.hlicense_info)
 
-        self.status_label = QLabel()
-        self.status_label.setWordWrap(True)
-        info_block_layout.addRow('Status', self.status_label)
+        status_label = QLabel('Status')
+        status_label.setAlignment(Qt.AlignTop)
+        self.status_info = QLabel()
+        self.status_info.setWordWrap(True)
+        info_block_layout.addRow(status_label, self.status_info)
 
+        location_label = QLabel('Location')
+        location_label.setAlignment(Qt.AlignTop)
         self.location = ''
-        self.location_label = LinkLabel()
-        self.location_label.setWordWrap(True)
-        self.location_label.setToolTip('Open Location')
-        info_block_layout.addRow('Location', self.location_label)
+        self.location_info = LinkLabel()
+        self.location_info.setWordWrap(True)
+        self.location_info.setToolTip('Open Location')
+        info_block_layout.addRow(location_label, self.location_info)
 
-        self.source_label = LinkLabel()
-        self.source_label.setWordWrap(True)
-        info_block_layout.addRow('Source', self.source_label)
+        source_label = QLabel('Source')
+        source_label.setAlignment(Qt.AlignTop)
+        self.source_info = LinkLabel()
+        self.source_info.setWordWrap(True)
+        info_block_layout.addRow(source_label, self.source_info)
 
-        self.state_label = QLabel()
-        self.state_label.setWordWrap(True)
-        info_block_layout.addRow('State', self.state_label)
+        state_label = QLabel('State')
+        state_label.setAlignment(Qt.AlignTop)
+        self.state_info = QLabel()
+        self.state_info.setWordWrap(True)
+        info_block_layout.addRow(state_label, self.state_info)
 
         spacer = QSpacerItem(0, 0, QSizePolicy.Ignored, QSizePolicy.Expanding)
         main_layout.addSpacerItem(spacer)
@@ -144,14 +165,14 @@ class PackageInfoView(QWidget):
 
     def updatePath(self):
         if self.__package is None:
-            self.location_label.setText('')
+            self.location_info.setText('')
             return
-        matrics = self.location_label.fontMetrics()
+        matrics = self.location_info.fontMetrics()
         char_width = matrics.horizontalAdvance('Mo') * 0.6
         available_length = char_width * len(self.__package.content_path)
         if available_length > self.width() - char_width * 18:
             available_length = int(self.width() / char_width)
-        self.location_label.setText(preparePath(self.__package.content_path, available_length))
+        self.location_info.setText(preparePath(self.__package.content_path, available_length))
 
     def resizeEvent(self, event):
         self.updatePath()
@@ -159,18 +180,18 @@ class PackageInfoView(QWidget):
 
     def updateFromCurrentPackage(self):
         if self.__package is None:
-            self.name_label.setText('')
-            self.desc_label.setText('')
-            self.author_label.setText('')
-            self.version_label.setText('')
-            self.hversion_label.setText('')
-            self.hlicense_label.setText('')
-            self.status_label.setText('')
-            self.location_label.setText('')
-            self.location_label.setLink(None)
-            self.source_label.setText('')
-            self.source_label.setLink(None)
-            self.state_label.setText('')
+            self.name_info.setText('')
+            self.desc_info.setText('')
+            self.author_info.setText('')
+            self.version_info.setText('')
+            self.hversion_info.setText('')
+            self.hlicense_info.setText('')
+            self.status_info.setText('')
+            self.location_info.setText('')
+            self.location_info.setLink(None)
+            self.source_info.setText('')
+            self.source_info.setLink(None)
+            self.state_info.setText('')
             self.update_group.hide()
             self.enable_button.setDisabled(True)
             self.disable_button.hide()
@@ -178,22 +199,22 @@ class PackageInfoView(QWidget):
             return
 
         self.uninstall_button.setEnabled(True)
-        self.name_label.setText(self.__package.name)
-        self.desc_label.setText(self.__package.description or '-')
-        self.author_label.setText(self.__package.author or '-')
-        self.version_label.setText(self.__package.version or '-')
-        self.hversion_label.setText(self.__package.hversion or '-')
-        self.hlicense_label.setText(self.__package.hlicense or '-')
-        self.status_label.setText(self.__package.status or '-')
-        self.location_label.setLink('file:///' + self.__package.content_path)
+        self.name_info.setText(self.__package.name)
+        self.desc_info.setText(self.__package.description or '-')
+        self.author_info.setText(self.__package.author or '-')
+        self.version_info.setText(self.__package.version or '-')
+        self.hversion_info.setText(self.__package.hversion or '-')
+        self.hlicense_info.setText(self.__package.hlicense or '-')
+        self.status_info.setText(self.__package.status or '-')
+        self.location_info.setLink('file:///' + self.__package.content_path)
         self.updatePath()
         self.update_group.setEnabled(True)
         if self.__package.source is not None:
-            self.source_label.setText('GitHub: ' + self.__package.source)
-            self.source_label.setLink(github.repoURL(*github.ownerAndRepoName(self.__package.source)))
+            self.source_info.setText('GitHub: ' + self.__package.source)
+            self.source_info.setLink(github.repoURL(*github.ownerAndRepoName(self.__package.source)))
         else:
-            self.source_label.setText('-')
-            self.source_label.setLink(None)
+            self.source_info.setText('-')
+            self.source_info.setLink(None)
         if self.__package.source and self.__package.source_type and self.__package.version:
             check = UpdateOptions().checkOnStartupForPackage(self.__package)
             self.check_updates_on_startup_toggle.blockSignals(True)
@@ -209,12 +230,12 @@ class PackageInfoView(QWidget):
         else:
             self.update_group.hide()
         if self.__package.isEnabled():
-            self.state_label.setText('Enabled')
+            self.state_info.setText('Enabled')
             self.enable_button.hide()
             self.disable_button.setEnabled(True)
             self.disable_button.show()
         else:
-            self.state_label.setText('Disabled')
+            self.state_info.setText('Disabled')
             self.enable_button.setEnabled(True)
             self.enable_button.show()
             self.disable_button.hide()
@@ -330,9 +351,9 @@ class ShelfListView(QListView):
         self.model().setPackage(package)
 
 
-class PanelListModel(QAbstractListModel):
+class PyPanelListModel(QAbstractListModel):
     def __init__(self, parent=None):
-        super(PanelListModel, self).__init__(parent)
+        super(PyPanelListModel, self).__init__(parent)
 
         self.__data = ()
 
@@ -341,7 +362,7 @@ class PanelListModel(QAbstractListModel):
         try:
             panels = []
             for panel_path in package.panels():
-                panels.extend(hou.pypanel.interfacesInFile(panel_path))
+                panels.extend(pypanel.interfacesInFile(panel_path))
             self.__data = tuple(panels)
         except (IOError, AttributeError):
             self.__data = ()
@@ -360,9 +381,9 @@ class PanelListModel(QAbstractListModel):
             return IconCache.icon(item.icon())
 
 
-class PanelListView(QListView):
+class PyPanelListView(QListView):
     def __init__(self):
-        super(PanelListView, self).__init__()
+        super(PyPanelListView, self).__init__()
         self.setAlternatingRowColors(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
