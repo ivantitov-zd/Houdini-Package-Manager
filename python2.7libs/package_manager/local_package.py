@@ -66,9 +66,10 @@ class LocalPackage(Package):
         with open(package_file) as file:
             data = json.load(file)
 
-        self.content_path = os.path.normpath(data['path']).replace('\\', '/')
+        self.content_path = os.path.normpath(hou.expandString(data['path'])).replace('\\', '/')
         if not os.path.isdir(self.content_path):
             raise IOError(self.content_path)
+
         if not isPackageFolder(self.content_path):
             raise NotPackageError('Folder "{0}" is not a package'.format(self.content_path))
 

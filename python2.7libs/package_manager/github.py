@@ -145,8 +145,9 @@ def extractRepoZip(file_path, repo_data, dst_location='$HOUDINI_USER_PREF_DIR', 
     if not dst_name:
         _, extension = os.path.splitext(os.path.basename(file_path))
         dst_name = repo_data.get('full_name', extension)
-        dst_name = dst_name.replace('/', '_')
-    dst_location = os.path.join(hou.expandString(dst_location), dst_name)
+        dst_name = dst_name.replace('/', '__')
+    dst_location = os.path.join(hou.expandString(dst_location),
+                                hou.expandString(dst_name))
     if os.path.exists(dst_location):
         shutil.rmtree(dst_location)
     with zipfile.ZipFile(file_path) as file:
@@ -181,13 +182,13 @@ def updatePackageDataFile(repo_data, package, package_location,
         data = {}
     package = package or WebPackage()
     if not data.get('name') or update:
-        data['name'] = package.name or repo_data['name']
+        data['name'] = package.name or repo_data['name'] or data.get('name')
     if not data.get('description') or update:
-        data['description'] = package.description or repo_data['description']
+        data['description'] = package.description or repo_data['description'] or data.get('description')
     if not data.get('author') or update:
-        data['author'] = package.author or repo_data['owner']['login']
+        data['author'] = package.author or repo_data['owner']['login'] or data.get('author')
     if not data.get('source') or update:
-        data['source'] = package.source or repo_data['full_name']
+        data['source'] = package.source or repo_data['full_name'] or data.get('source')
     if not data.get('source_type'):
         data['source_type'] = package.source_type or 'github'
     # Todo: or Version(data['version']) < version  # consider type
@@ -195,14 +196,15 @@ def updatePackageDataFile(repo_data, package, package_location,
         data['version'] = version
         data['version_type'] = version_type
     if not data.get('hversion') or update:
-        data['hversion'] = package.hversion or '*'
+        data['hversion'] = package.hversion or data.get('hversion') or '*'
     if not data.get('hlicense'):
         data['hlicense'] = package.hlicense or \
+                           data.get('hlicense') or \
                            fullHoudiniLicenseName(HOUDINI_COMMERCIAL_LICENSE)
     if not data.get('status') or update:
-        data['status'] = package.status or 'Stable'
+        data['status'] = package.status or data.get('status') or 'Stable'
     if not data.get('setup_schema') or update:
-        data['setup_schema'] = package.setup_schema
+        data['setup_schema'] = package.setup_schema or data.get('setup_schema')
     with open(data_file_path, 'w') as file:
         json.dump(data, file, indent=4, encoding='utf-8')
 
@@ -257,9 +259,11 @@ def installFromRepo(package_or_link, dst_location='$HOUDINI_USER_PREF_DIR', upda
     else:
         package_location = extractRepoZip(zip_file, repo_data, dst_location)
     os.remove(zip_file)
+
     if len(versions) == 0:
         version = repo_data['pushed_at']
     updatePackageDataFile(repo_data, package, package_location, version, version_type, update)
+
     if not update:
         LocalPackage.install(package_location, setup_schema=package.setup_schema or setup_schema)
     return True
