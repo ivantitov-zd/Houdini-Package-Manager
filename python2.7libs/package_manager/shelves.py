@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from lxml import etree
+from xml.etree import ElementTree
 
 
 class ShelfItem:
@@ -24,12 +24,12 @@ def definitionsInFile(file_path):
         xml_data = file.read()
     shelves = []
     try:
-        root = etree.fromstring(xml_data)
-        for data in root.getiterator('tool'):
+        root = ElementTree.fromstring(xml_data)
+        for data in root.iter('tool'):
             data = data.items()
             shelves.append(ShelfItem(label=data[1][1],
                                      name=data[0][1],
                                      icon=data[2][1]))
-    except etree.XMLSyntaxError:
+    except ElementTree.ParseError:
         pass
     return tuple(shelves)

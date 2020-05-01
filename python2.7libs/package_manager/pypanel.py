@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from lxml import etree
+from xml.etree import ElementTree
 
 
 class PyPanelItem:
@@ -24,12 +24,12 @@ def interfacesInFile(file_path):
         xml_data = file.read()
     panels = []
     try:
-        root = etree.fromstring(xml_data)
-        for data in root.getiterator('interface'):
+        root = ElementTree.fromstring(xml_data)
+        for data in root.iter('interface'):
             data = data.items()
             panels.append(PyPanelItem(label=data[1][1],
                                       name=data[0][1],
                                       icon=data[2][1]))
-    except etree.XMLSyntaxError:
+    except ElementTree.ParseError:
         pass
     return tuple(panels)
