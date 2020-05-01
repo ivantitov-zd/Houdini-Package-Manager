@@ -3,7 +3,7 @@ from __future__ import print_function
 from xml.etree import ElementTree
 
 
-class PyPanelItem:
+class PyPanelItem(object):
     def __init__(self, label, name, icon):
         self.__label = label
         self.__name = name
