@@ -135,7 +135,11 @@ class MainWindow(QWidget):
 
         shelf_list_view = ShelfListView()
         shelf_list_view.setModel(ShelfListModel(self))
-        self.package_content_tabs.addTab(shelf_list_view, 'Shelf Tools')
+        self.package_content_tabs.addTab(shelf_list_view, 'Shelves')
+
+        shelf_tool_list_view = ShelfToolListView()
+        shelf_tool_list_view.setModel(ShelfToolListModel(self))
+        self.package_content_tabs.addTab(shelf_tool_list_view, 'Shelf Tools')
 
         panel_list_view = PyPanelListView()
         panel_list_view.setModel(PyPanelListModel(self))

@@ -15,7 +15,7 @@ import hou
 
 from .link_label import LinkLabel
 from .path_text import preparePath
-from .shelves import definitionsInFile
+from .shelves import shelvesInFile, toolsInFile
 from . import github
 from .update_options import UpdateOptions
 from . import pypanel
@@ -322,8 +322,46 @@ class ShelfListModel(QAbstractListModel):
         try:
             shelves = []
             for shelf_path in package.shelves():
-                shelves.extend(definitionsInFile(shelf_path))
+                shelves.extend(shelvesInFile(shelf_path))
             self.__data = tuple(shelves)
+        except (IOError, AttributeError):
+            self.__data = ()
+        self.endResetModel()
+
+    def rowCount(self, parent):
+        return len(self.__data)
+
+    def data(self, index, role):
+        item = self.__data[index.row()]
+        if role == Qt.DisplayRole:
+            return item.label()
+        if role == Qt.ToolTipRole:
+            return item.name()
+
+
+class ShelfListView(QListView):
+    def __init__(self):
+        super(ShelfListView, self).__init__()
+        self.setAlternatingRowColors(True)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+    def setPackage(self, package):
+        self.model().setPackage(package)
+
+
+class ShelfToolListModel(QAbstractListModel):
+    def __init__(self, parent=None):
+        super(ShelfToolListModel, self).__init__(parent)
+
+        self.__data = ()
+
+    def setPackage(self, package):
+        self.beginResetModel()
+        try:
+            tools = []
+            for shelf_path in package.shelves():
+                tools.extend(toolsInFile(shelf_path))
+            self.__data = tuple(tools)
         except (IOError, AttributeError):
             self.__data = ()
         self.endResetModel()
@@ -341,9 +379,9 @@ class ShelfListModel(QAbstractListModel):
             return IconCache.icon(item.icon())
 
 
-class ShelfListView(QListView):
+class ShelfToolListView(QListView):
     def __init__(self):
-        super(ShelfListView, self).__init__()
+        super(ShelfToolListView, self).__init__()
         self.setAlternatingRowColors(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
