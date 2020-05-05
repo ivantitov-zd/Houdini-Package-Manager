@@ -1,0 +1,10 @@
+{
+    "name": "Redshift",
+    "root": "<package_root>/../$HOUDINI_VERSION",
+    "env": [
+        {
+            "name": "PATH",
+            "value": "<package_root>/../../../bin"
+        }
+    ]
+}
