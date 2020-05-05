@@ -1,7 +1,5 @@
 from __future__ import print_function
 
-import re
-
 
 class Token(object):
     def __new__(cls, source):

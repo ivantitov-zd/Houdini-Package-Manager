@@ -1,23 +1,21 @@
 from __future__ import print_function
 
+import datetime
 import json
 import os
 import shutil
-import tempfile
 import zipfile
-import time
-import datetime
 
 import hou
 import requests
 
-from .local_package import NotPackageError, LocalPackage
 from package_manager.package import isPackage
-from .houdini_license import fullHoudiniLicenseName, HOUDINI_COMMERCIAL_LICENSE
-from .version_dialog import VersionDialog
-from .version import Version
-from .web_package import WebPackage
+from .houdini_license import HOUDINI_COMMERCIAL_LICENSE, fullHoudiniLicenseName
+from .local_package import LocalPackage
 from .package import Package
+from .version import Version
+from .version_dialog import VersionDialog
+from .web_package import WebPackage
 
 
 class RepoNotFound(IOError):

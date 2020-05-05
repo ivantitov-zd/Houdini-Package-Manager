@@ -1,8 +1,5 @@
 from __future__ import print_function
 
-import json
-from operator import itemgetter
-
 try:
     from PyQt5.QtWidgets import *
     from PyQt5.QtGui import *
@@ -11,12 +8,6 @@ except ImportError:
     from PySide2.QtWidgets import *
     from PySide2.QtGui import *
     from PySide2.QtCore import *
-
-import hou
-import requests
-
-from .web_package import WebPackage
-from .version import Version, VersionRange
 
 
 class UpdateListModel(QAbstractListModel):

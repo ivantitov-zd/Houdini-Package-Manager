@@ -6,8 +6,8 @@ import os
 import hou
 
 from .houdini_license import fullHoudiniLicenseName
-from .package_status import fullPackageStatusName
 from .package import Package, isPackage
+from .package_status import fullPackageStatusName
 from .setup_schema import makeSetupSchema
 
 

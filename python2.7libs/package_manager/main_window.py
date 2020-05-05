@@ -11,12 +11,11 @@ except ImportError:
 
 import hou
 
-from .local_package import LocalPackage, findInstalledPackages
+from .local_package import findInstalledPackages
 from .package_list import *
 from .local_package_content import *
 from .web_package_list import *
 from .web_package_content import WebPackageInfoView
-from . import github
 from .settings import SettingsWidget
 from .install_web import installPackageFromWebLink
 from .install_local import pickAndInstallPackageFromFolder

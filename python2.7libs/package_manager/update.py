@@ -1,13 +1,11 @@
 from __future__ import print_function
 
-import json
 from time import time
 
-from .local_package import findInstalledPackages, LocalPackage
 from . import github
+from .local_package import findInstalledPackages
 from .update_dialog import UpdateDialog
 from .update_options import UpdateOptions
-from .web_package import WebPackage
 
 
 def hasUpdate(package, only_stable=None):

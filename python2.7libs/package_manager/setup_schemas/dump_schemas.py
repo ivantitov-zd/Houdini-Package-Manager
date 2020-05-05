@@ -1,5 +1,5 @@
-import os
 import json
+import os
 
 ROOT = os.path.dirname(__file__)
 

@@ -9,8 +9,6 @@ except ImportError:
     from PySide2.QtGui import *
     from PySide2.QtCore import *
 
-import hou
-
 from .update_options import UpdateOptions
 
 
