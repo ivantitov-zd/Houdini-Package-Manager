@@ -17,8 +17,6 @@ from .local_package_content import *
 from .web_package_list import *
 from .web_package_content import WebPackageInfoView
 from .settings import SettingsWidget
-from .install_web import installPackageFromWebLink
-from .install_local import pickAndInstallPackageFromFolder
 
 
 class MainWindow(QWidget):
@@ -38,17 +36,6 @@ class MainWindow(QWidget):
         top_layout.setContentsMargins(0, 0, 0, 0)
         top_layout.setSpacing(4)
         main_layout.addLayout(top_layout)
-
-        local_install_button = QPushButton('Install Local Package')
-        local_install_button.clicked.connect(self.pickAndInstallPackageFromFolder)
-        top_layout.addWidget(local_install_button)
-
-        web_install_button = QPushButton('Install Web Package')
-        web_install_button.clicked.connect(self.installPackageFromWebLink)
-        top_layout.addWidget(web_install_button)
-
-        top_spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Ignored)
-        top_layout.addSpacerItem(top_spacer)
 
         view_mode_button_group = QButtonGroup(self)
         view_mode_button_group.setExclusive(True)
@@ -84,6 +71,9 @@ class MainWindow(QWidget):
         view_mode_button_group.addButton(settings_mode_button)
         view_mode_button_group.setId(settings_mode_button, 2)
         top_layout.addWidget(settings_mode_button)
+
+        top_spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Ignored)
+        top_layout.addSpacerItem(top_spacer)
 
         help_button = hou.qt.HelpButton('/ref/windows/package_manager')
         top_layout.addWidget(help_button)
@@ -195,14 +185,6 @@ class MainWindow(QWidget):
 
     def updateWebContentSource(self):
         self.web_info_view.setWebPackage(self.current_web_package)
-
-    def pickAndInstallPackageFromFolder(self):
-        if pickAndInstallPackageFromFolder(self):
-            self.updateLocalPackageList()
-
-    def installPackageFromWebLink(self):
-        if installPackageFromWebLink(self):
-            self.updateLocalPackageList()
 
     def _setCurrentPackage(self, index):
         package = index.data(Qt.UserRole)
