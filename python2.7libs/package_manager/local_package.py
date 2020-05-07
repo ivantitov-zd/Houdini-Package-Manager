@@ -224,4 +224,12 @@ def findInstalledPackages():
 
     # Todo: support dynamic setting of the package dir if possible
 
-    return tuple(LocalPackage(path) for path in json_paths)
+    packages = []
+    for path in json_paths:
+        try:
+            package = LocalPackage(path)
+            packages.append(package)
+        except IOError:
+            pass
+
+    return tuple(packages)
