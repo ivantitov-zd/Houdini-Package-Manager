@@ -73,7 +73,7 @@ class InstallFromWebLinkDialog(QDialog):
 def installPackageFromWebLink(parent=None):
     ok, link, schema = InstallFromWebLinkDialog.getInstallationData(parent)
     if ok and link:
-        github.installFromRepo(link, setup_schema=schema)
-        hou.ui.setStatusMessage('Successfully installed',
-                                hou.severityType.ImportantMessage)
+        if github.installFromRepo(link, setup_schema=schema):
+            hou.ui.setStatusMessage('Successfully installed',
+                                    hou.severityType.ImportantMessage)
         return True
