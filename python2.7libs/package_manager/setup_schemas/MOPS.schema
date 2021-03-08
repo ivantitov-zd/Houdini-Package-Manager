@@ -1,0 +1,10 @@
+{
+    "name": "MOPS",
+    "author": "Henry Foster",
+    "env": [
+        {
+            "name": "MOPS",
+            "value": "<package_root>"
+        }
+    ]
+}

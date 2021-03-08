@@ -1,0 +1,36 @@
+{
+    "name": "qLib",
+    "author": "qLab",
+    "env": [
+        {
+            "name": "QLIB",
+            "value": "<package_root>"
+        },
+        {
+            "name": "QOTL",
+            "value": "$QLIB/otls"
+        }
+    ],
+    "hda_roots": [
+        {
+            "name": "Base",
+            "path": "$QOTL/base"
+        },
+        {
+            "name": "Future",
+            "path": "$QOTL/future",
+            "optional": true
+        },
+        {
+            "name": "Experimental",
+            "path": "$QOTL/experimental",
+            "optional": true
+        },
+        {
+            "name": "Graveyard",
+            "path": "$QOTL/graveyard",
+            "optional": true,
+            "enabled": false
+        }
+    ]
+}

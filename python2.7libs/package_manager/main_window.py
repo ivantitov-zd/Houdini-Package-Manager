@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from __future__ import print_function
 
 try:
@@ -11,15 +13,12 @@ except ImportError:
 
 import hou
 
-from .local_package import LocalPackage, findInstalledPackages
+from .local_package import findInstalledPackages
 from .package_list import *
 from .local_package_content import *
 from .web_package_list import *
 from .web_package_content import WebPackageInfoView
-from . import github
 from .settings import SettingsWidget
-from .install_web import installPackageFromWebLink
-from .install_local import pickAndInstallPackageFromFolder
 
 
 class MainWindow(QWidget):
@@ -40,53 +39,45 @@ class MainWindow(QWidget):
         top_layout.setSpacing(4)
         main_layout.addLayout(top_layout)
 
-        local_install_button = QPushButton('Install Local Package')
-        local_install_button.clicked.connect(self.pickAndInstallPackageFromFolder)
-        top_layout.addWidget(local_install_button)
+        view_mode_button_group = QButtonGroup(self)
+        view_mode_button_group.setExclusive(True)
+        view_mode_button_group.buttonClicked['int'].connect(self._switchPanel)
 
-        web_install_button = QPushButton('Install Web Package')
-        web_install_button.clicked.connect(self.installPackageFromWebLink)
-        top_layout.addWidget(web_install_button)
+        self.local_mode_button = QPushButton()
+        self.local_mode_button.setFixedSize(24, 24)
+        self.local_mode_button.setToolTip('Installed\tCtrl+1')
+        self.local_mode_button.setIcon(hou.qt.Icon('DOP_fetchdata', 16, 16))
+        self.local_mode_button.setIconSize(QSize(16, 16))
+        self.local_mode_button.setCheckable(True)
+        self.local_mode_button.toggle()
+        view_mode_button_group.addButton(self.local_mode_button)
+        view_mode_button_group.setId(self.local_mode_button, 0)
+        top_layout.addWidget(self.local_mode_button)
+
+        self.web_mode_button = QPushButton()
+        self.web_mode_button.setFixedSize(24, 24)
+        self.web_mode_button.setToolTip('Install from Web\tCtrl+2')
+        self.web_mode_button.setIcon(hou.qt.Icon('MISC_database', 16, 16))  # IMAGE_auto_update
+        self.web_mode_button.setIconSize(QSize(16, 16))
+        self.web_mode_button.setCheckable(True)
+        view_mode_button_group.addButton(self.web_mode_button)
+        view_mode_button_group.setId(self.web_mode_button, 1)
+        top_layout.addWidget(self.web_mode_button)
+
+        self.settings_mode_button = QPushButton()
+        self.settings_mode_button.setFixedSize(24, 24)
+        self.settings_mode_button.setToolTip('Settings\tCtrl+3')
+        self.settings_mode_button.setIcon(hou.qt.Icon('LOP_rendersettings', 16, 16))
+        self.settings_mode_button.setIconSize(QSize(16, 16))
+        self.settings_mode_button.setCheckable(True)
+        view_mode_button_group.addButton(self.settings_mode_button)
+        view_mode_button_group.setId(self.settings_mode_button, 2)
+        top_layout.addWidget(self.settings_mode_button)
 
         top_spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Ignored)
         top_layout.addSpacerItem(top_spacer)
 
-        view_mode_button_group = QButtonGroup(self)
-        view_mode_button_group.setExclusive(True)
-        view_mode_button_group.buttonClicked['int'].connect(self.switchMode)
-
-        local_mode_button = QPushButton()
-        local_mode_button.setFixedSize(24, 24)
-        local_mode_button.setToolTip('Installed')
-        local_mode_button.setIcon(hou.qt.Icon('DOP_fetchdata', 16, 16))
-        local_mode_button.setIconSize(QSize(16, 16))
-        local_mode_button.setCheckable(True)
-        local_mode_button.toggle()
-        view_mode_button_group.addButton(local_mode_button)
-        view_mode_button_group.setId(local_mode_button, 0)
-        top_layout.addWidget(local_mode_button)
-
-        web_mode_button = QPushButton()
-        web_mode_button.setFixedSize(24, 24)
-        web_mode_button.setToolTip('Install from Web')
-        web_mode_button.setIcon(hou.qt.Icon('MISC_database', 16, 16))  # IMAGE_auto_update
-        web_mode_button.setIconSize(QSize(16, 16))
-        web_mode_button.setCheckable(True)
-        view_mode_button_group.addButton(web_mode_button)
-        view_mode_button_group.setId(web_mode_button, 1)
-        top_layout.addWidget(web_mode_button)
-
-        settings_mode_button = QPushButton()
-        settings_mode_button.setFixedSize(24, 24)
-        settings_mode_button.setToolTip('Settings')
-        settings_mode_button.setIcon(hou.qt.Icon('LOP_rendersettings', 16, 16))
-        settings_mode_button.setIconSize(QSize(16, 16))
-        settings_mode_button.setCheckable(True)
-        view_mode_button_group.addButton(settings_mode_button)
-        view_mode_button_group.setId(settings_mode_button, 2)
-        top_layout.addWidget(settings_mode_button)
-
-        help_button = hou.qt.HelpButton('/ref/windows/package_manager')
+        help_button = hou.qt.HelpButton('/ref/windows/package_manager', 'Show help for this window\tF1')
         top_layout.addWidget(help_button)
 
         self.stack_layout = QStackedLayout()
@@ -135,7 +126,11 @@ class MainWindow(QWidget):
 
         shelf_list_view = ShelfListView()
         shelf_list_view.setModel(ShelfListModel(self))
-        self.package_content_tabs.addTab(shelf_list_view, 'Shelf Tools')
+        self.package_content_tabs.addTab(shelf_list_view, 'Shelves')
+
+        shelf_tool_list_view = ShelfToolListView()
+        shelf_tool_list_view.setModel(ShelfToolListModel(self))
+        self.package_content_tabs.addTab(shelf_tool_list_view, 'Shelf Tools')
 
         panel_list_view = PyPanelListView()
         panel_list_view.setModel(PyPanelListModel(self))
@@ -193,14 +188,6 @@ class MainWindow(QWidget):
     def updateWebContentSource(self):
         self.web_info_view.setWebPackage(self.current_web_package)
 
-    def pickAndInstallPackageFromFolder(self):
-        if pickAndInstallPackageFromFolder(self):
-            self.updateLocalPackageList()
-
-    def installPackageFromWebLink(self):
-        if installPackageFromWebLink(self):
-            self.updateLocalPackageList()
-
     def _setCurrentPackage(self, index):
         package = index.data(Qt.UserRole)
         self.current_package = package
@@ -211,5 +198,29 @@ class MainWindow(QWidget):
         self.current_web_package = web_package
         self.updateWebContentSource()
 
-    def switchMode(self, mode_id):
-        self.stack_layout.setCurrentIndex(mode_id)
+    def _switchPanel(self, panel_id):
+        self.stack_layout.setCurrentIndex(panel_id)
+
+    def keyPressEvent(self, event):
+        key = event.key()
+        modifiers = event.modifiers()
+        if modifiers == Qt.NoModifier and key == Qt.Key_F5:
+            current_panel_index = self.stack_layout.currentIndex()
+            if current_panel_index == 0:
+                self.updateLocalPackageList()
+            elif current_panel_index == 1:
+                self.updateWebPackageList()
+        elif modifiers == Qt.NoModifier and key == Qt.Key_F1:
+            desktop = hou.ui.curDesktop()
+            desktop.displayHelpPath('/ref/windows/package_manager')
+        elif modifiers == Qt.ControlModifier and key == Qt.Key_1:
+            self.local_mode_button.setChecked(True)
+            self._switchPanel(0)
+        elif modifiers == Qt.ControlModifier and key == Qt.Key_2:
+            self.web_mode_button.setChecked(True)
+            self._switchPanel(1)
+        elif modifiers == Qt.ControlModifier and key == Qt.Key_3:
+            self.settings_mode_button.setChecked(True)
+            self._switchPanel(2)
+        else:
+            super(MainWindow, self).keyPressEvent(event)

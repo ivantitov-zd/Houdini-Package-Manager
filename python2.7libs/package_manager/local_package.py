@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from __future__ import print_function
 
 import json
@@ -6,8 +8,8 @@ import os
 import hou
 
 from .houdini_license import fullHoudiniLicenseName
-from .package_status import fullPackageStatusName
 from .package import Package, isPackage
+from .package_status import fullPackageStatusName
 from .setup_schema import makeSetupSchema
 
 
@@ -32,7 +34,7 @@ def isPackageFolder(path):
 def packageNameFromContent(content_path):
     setup_file_path = os.path.join(content_path, 'package.setup')
     name = None
-    if os.path.isfile(setup_file_path):
+    if os.path.exists(setup_file_path) and os.path.isfile(setup_file_path):
         with open(setup_file_path) as file:
             data = json.load(file)
         name = data.get('name')
@@ -43,6 +45,14 @@ def packageNameFromContent(content_path):
         elif name.endswith('-dev') and len(name) > 4:
             name = name[:-4]
     return name
+
+
+def packageAuthorFromContent(content_path):
+    setup_file_path = os.path.join(content_path, 'package.setup')
+    if os.path.exists(setup_file_path) and os.path.isfile(setup_file_path):
+        with open(setup_file_path) as file:
+            data = json.load(file)
+        return data.get('author')
 
 
 def findFiles(path, ignore_folders=True, recursive=False):
@@ -144,8 +154,12 @@ class LocalPackage(Package):
         if not os.path.exists(content_path) or not os.path.isdir(content_path):
             raise FileNotFoundError('Package folder not found')
 
-        name = packageNameFromContent(content_path).replace(' ', '_')
-        package_file = os.path.join(hou.expandString('$HOUDINI_USER_PREF_DIR/packages'), name + '.json')
+        name = packageNameFromContent(content_path).replace(' ', '_')  # Todo: what if name missing
+        author = packageAuthorFromContent(content_path)
+        package_file_name = name + '.json'
+        if author:
+            package_file_name = author.replace(' ', '_') + '__' + package_file_name
+        package_file = os.path.join(hou.expandString('$HOUDINI_USER_PREF_DIR/packages'), package_file_name)
         if os.path.exists(package_file):
             raise AlreadyInstalledError('Package already installed')
 
@@ -212,4 +226,12 @@ def findInstalledPackages():
 
     # Todo: support dynamic setting of the package dir if possible
 
-    return tuple(LocalPackage(path) for path in json_paths)
+    packages = []
+    for path in json_paths:
+        try:
+            package = LocalPackage(path)
+            packages.append(package)
+        except (ValueError, IOError):
+            continue
+
+    return tuple(packages)

@@ -1,6 +1,6 @@
-from __future__ import print_function
+# coding: utf-8
 
-import re
+from __future__ import print_function
 
 
 class Token(object):

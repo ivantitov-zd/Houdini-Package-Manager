@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from __future__ import print_function
 
 import os
@@ -19,7 +21,7 @@ def findPackageRootPath(path):
             paths.append(root)
             scores.append(score)
     if not paths:
-        raise FileNotFoundError('No packages found')
+        raise FileNotFoundError('No package found')
     return sorted(zip(paths, scores), key=itemgetter(1))[-1][0]
 
 
@@ -38,14 +40,6 @@ def findDigitalAssetsRoots(package_root_path):
                 paths.append(root)
                 break
     return tuple(paths)
-
-
-def findVEXLibrariesRoots(package_root_path):
-    raise NotImplementedError
-
-
-def findPythonLibrariesRoots(package_root_path):
-    raise NotImplementedError
 
 
 def makeSetupSchema(path):

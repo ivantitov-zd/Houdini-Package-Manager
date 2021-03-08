@@ -1,23 +1,31 @@
+# coding: utf-8
+
 from __future__ import print_function
 
+import datetime
 import json
 import os
 import shutil
-import tempfile
 import zipfile
-import time
-import datetime
 
 import hou
 import requests
 
-from .local_package import NotPackageError, LocalPackage
+try:
+    from PyQt5.QtWidgets import *
+    from PyQt5.QtGui import *
+    from PyQt5.QtCore import *
+except ImportError:
+    from PySide2.QtWidgets import *
+    from PySide2.QtGui import *
+    from PySide2.QtCore import *
+
 from package_manager.package import isPackage
-from .houdini_license import fullHoudiniLicenseName, HOUDINI_COMMERCIAL_LICENSE
-from .version_dialog import VersionDialog
+from .houdini_license import HOUDINI_COMMERCIAL_LICENSE, fullHoudiniLicenseName
+from .local_package import LocalPackage
+from .package import Package
 from .version import Version
 from .web_package import WebPackage
-from .package import Package
 
 
 class RepoNotFound(IOError):
@@ -209,19 +217,117 @@ def updatePackageDataFile(repo_data, package, package_location,
         json.dump(data, file, indent=4, encoding='utf-8')
 
 
-def downloadRepoZipArchive(repo_data, version=None, dst_location='$TEMP'):
-    repo_owner = repo_data['owner']['login']
-    repo_name = repo_data['name']
-    branch = repo_data.get('default_branch', 'master')
-    zip_url = 'https://github.com/{0}/{1}/zipball/{2}'.format(repo_owner, repo_name, version or branch)
-    zip_file_path = os.path.join(hou.expandString(dst_location), repo_name + '.zip')
+def downloadFile(url, dst_location='$TEMP'):
+    zip_file_path = os.path.join(hou.expandString(dst_location), os.path.basename(url) + '.zip')
     with open(zip_file_path, 'wb') as file:
-        r = requests.get(zip_url, timeout=5)
+        r = requests.get(url, timeout=5)
         file.write(r.content)  # Todo: sequentially
     return zip_file_path
 
 
-def installFromRepo(package_or_link, dst_location='$HOUDINI_USER_PREF_DIR', update=False, only_stable=True, setup_schema=None):
+class PickReleaseDialog(QDialog):
+    def __init__(self, parent=None):
+        super(PickReleaseDialog, self).__init__(parent)
+
+        self.setWindowTitle('Choose release')
+
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(4, 4, 4, 4)
+        main_layout.setSpacing(4)
+
+        form_layout = QFormLayout()
+        main_layout.addLayout(form_layout)
+        # form_layout.setContentsMargins(4, 4, 4, 4)
+        # form_layout.setSpacing(4)
+
+        self.release_combo = QComboBox()
+        form_layout.addRow('Release', self.release_combo)
+
+        buttons_layout = QHBoxLayout()
+        main_layout.addLayout(buttons_layout)
+
+        ok_button = QPushButton('OK')
+        ok_button.clicked.connect(self._onOk)
+        buttons_layout.addWidget(ok_button)
+
+        cancel_button = QPushButton('Cancel')
+        cancel_button.clicked.connect(self.reject)
+        buttons_layout.addWidget(cancel_button)
+
+        self.current_release = None
+
+    def _onOk(self):
+        self.current_release = self.release_combo.currentData(Qt.UserRole)
+        self.accept()
+
+    def _setReleaseList(self, releases):
+        self.release_combo.clear()
+        for release_data in releases:
+            self.release_combo.addItem(release_data['tag_name'], release_data)
+
+    @classmethod
+    def getRelease(cls, releases, parent=None):
+        window = cls(parent)
+        window._setReleaseList(releases)
+        window.exec_()
+        return window.current_release
+
+
+class PickAssetDialog(QDialog):
+    def __init__(self, parent=None):
+        super(PickAssetDialog, self).__init__(parent)
+
+        self.setWindowTitle('Choose asset')
+
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(4, 4, 4, 4)
+        main_layout.setSpacing(4)
+
+        form_layout = QFormLayout()
+        main_layout.addLayout(form_layout)
+        # form_layout.setContentsMargins(4, 4, 4, 4)
+        # form_layout.setSpacing(4)
+
+        self.asset_combo = QComboBox()
+        form_layout.addRow('Asset', self.asset_combo)
+
+        buttons_layout = QHBoxLayout()
+        main_layout.addLayout(buttons_layout)
+
+        ok_button = QPushButton('OK')
+        ok_button.clicked.connect(self._onOk)
+        buttons_layout.addWidget(ok_button)
+
+        cancel_button = QPushButton('Cancel')
+        cancel_button.clicked.connect(self.reject)
+        buttons_layout.addWidget(cancel_button)
+
+        self.current_asset = None
+
+    def _onOk(self):
+        self.current_asset = self.asset_combo.currentData(Qt.UserRole)
+        self.accept()
+
+    def _setAssetList(self, assets):
+        self.asset_combo.clear()
+        for asset_data in assets:
+            self.asset_combo.addItem(asset_data['name'], asset_data)
+        self.asset_combo.addItem('Repo Archive', 'repo_archive')
+
+    @classmethod
+    def getAsset(cls, release_data, parent=None):
+        window = cls(parent)
+        window._setAssetList(release_data['assets'])
+        window.exec_()
+        return window.current_asset
+
+
+# def isReleaseStable(release):
+#     raise NotImplementedError
+
+
+def installFromRepo(package_or_link, dst_location='$HOUDINI_USER_PREF_DIR',
+                    update=False, only_stable=True, setup_schema=None):
     if isinstance(package_or_link, Package):
         package = package_or_link
         repo_owner, repo_name = ownerAndRepoName(package.source)
@@ -232,27 +338,56 @@ def installFromRepo(package_or_link, dst_location='$HOUDINI_USER_PREF_DIR', upda
     repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(repo_owner, repo_name)
     repo_data = API.get(repo_api_url)
 
-    version = None
     releases_api_url = repo_api_url + '/releases'
-    versions = []
-    for release_data in API.get(releases_api_url):
-        if only_stable and release_data['prerelease']:
-            continue
-        versions.append(Version(release_data['tag_name']))
-    if versions:
+    releases = []
+    for i in range(1, 4):  # Latest 90 releases (30 per page)
+        releases.extend(API.get(releases_api_url + '?page=' + str(i)))
+
+    suitable_releases = []
+    for release_data in releases:
+        if only_stable and release_data['prerelease'] or release_data.get('draft'):
+            continue  # Todo: Check release type by version
+        suitable_releases.append(release_data)
+
+    if not suitable_releases:
+        latest_release_api_url = repo_api_url + '/releases/latest'
+        latest_release_data = API.get(latest_release_api_url)
+        if 'tag_name' in latest_release_data:
+            suitable_releases = latest_release_data,
+
+    if suitable_releases:
+        if len(suitable_releases) == 1 or update:
+            release_data = suitable_releases[0]
+        else:
+            release_data = PickReleaseDialog.getRelease(suitable_releases, hou.qt.mainWindow())
+            if not release_data:
+                return False  # Cancelled
         version_type = 'version'
+        version = release_data['tag_name']
+
+        if release_data['assets']:
+            if len(release_data['assets']) == 1:
+                asset_data = release_data['assets'][0]
+            else:
+                asset_data = PickAssetDialog.getAsset(release_data, hou.qt.mainWindow())
+
+            if asset_data == 'repo_archive':
+                asset_url = release_data['zipball_url']
+            elif not asset_data:
+                return False  # Cancelled
+            else:
+                asset_url = asset_data['browser_download_url']
+        else:
+            asset_url = release_data['zipball_url']
     else:
         version_type = 'time_github'
-    if len(versions) >= 1:
-        if update:
-            version = versions[0].raw
-        else:
-            try:
-                version = VersionDialog.getVersion(hou.qt.mainWindow(), versions).raw
-            except AttributeError:
-                return False  # Cancelled
+        version = repo_data['pushed_at']
+        repo_owner = repo_data['owner']['login']
+        repo_name = repo_data['name']
+        branch = repo_data.get('default_branch', 'master')
+        asset_url = 'https://github.com/{0}/{1}/zipball/{2}'.format(repo_owner, repo_name, branch)
 
-    zip_file = downloadRepoZipArchive(repo_data, version)
+    zip_file = downloadFile(asset_url)
     if update:
         dst_location, dst_name = os.path.split(package.content_path)
         package_location = extractRepoZip(zip_file, repo_data, dst_location, dst_name)
@@ -260,8 +395,6 @@ def installFromRepo(package_or_link, dst_location='$HOUDINI_USER_PREF_DIR', upda
         package_location = extractRepoZip(zip_file, repo_data, dst_location)
     os.remove(zip_file)
 
-    if len(versions) == 0:
-        version = repo_data['pushed_at']
     updatePackageDataFile(repo_data, package, package_location, version, version_type, update)
 
     if not update:
@@ -282,25 +415,22 @@ def repoHasUpdate(link, version, version_type, only_stable=True):
         latest_version = parseTimestamp(repo_data['pushed_at'])
         version = parseTimestamp(version)
         # Todo: support only_stable
-    else:
-        releases_api_url = repo_api_url + '/releases'
-        releases_data = API.get(releases_api_url)
-
-        if not releases_data:
-            return False
-
-        if not isinstance(releases_data, list):
-            return False
-
-        release_index = 0
+    else:  # version_type == 'version':
         if only_stable:
-            for index, release_data in enumerate(releases_data):
-                if not release_data['prerelease']:
-                    release_index = index
-                    break
-            else:
+            latest_release_api_url = repo_api_url + '/releases/latest'
+            release_data = API.get(latest_release_api_url)
+        else:
+            releases_api_url = repo_api_url + '/releases'
+            releases_data = API.get(releases_api_url)
+
+            if not releases_data:
                 return False
 
-        latest_version = Version(releases_data[release_index]['tag_name'])
+            if not isinstance(releases_data, list):
+                return False
+
+            release_data = releases_data[0]
+
+        latest_version = Version(release_data['tag_name'])
 
     return latest_version > version
