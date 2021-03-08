@@ -231,7 +231,7 @@ def findInstalledPackages():
         try:
             package = LocalPackage(path)
             packages.append(package)
-        except IOError:
-            pass
+        except (ValueError, IOError):
+            continue
 
     return tuple(packages)
