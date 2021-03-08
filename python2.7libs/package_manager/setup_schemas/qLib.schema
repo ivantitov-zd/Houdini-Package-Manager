@@ -18,15 +18,19 @@
         },
         {
             "name": "Future",
-            "path": "$QOTL/future"
+            "path": "$QOTL/future",
+            "optional": true
         },
         {
             "name": "Experimental",
-            "path": "$QOTL/experimental"
+            "path": "$QOTL/experimental",
+            "optional": true
         },
         {
             "name": "Graveyard",
-            "path": "$QOTL/graveyard"
+            "path": "$QOTL/graveyard",
+            "optional": true,
+            "enabled": false
         }
     ]
 }

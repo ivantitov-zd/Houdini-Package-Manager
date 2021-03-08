@@ -24,15 +24,19 @@ schemas = {
             },
             {
                 'name': 'Future',
-                'path': '$QOTL/future'
+                'path': '$QOTL/future',
+                'optional': True
             },
             {
                 'name': 'Experimental',
-                'path': '$QOTL/experimental'
+                'path': '$QOTL/experimental',
+                'optional': True
             },
             {
                 'name': 'Graveyard',
-                'path': '$QOTL/graveyard'
+                'path': '$QOTL/graveyard',
+                'optional': True,
+                'enabled': False
             }
         ]
     },
@@ -48,11 +52,15 @@ schemas = {
     },
     'Redshift': {
         'name': 'Redshift',
-        'root': '<package_root>/../$HOUDINI_VERSION',
+        'root': {
+            'path': '<package_root>/../$HOUDINI_VERSION',
+            'method': 'append'
+        },
         'env': [
             {
                 'name': 'PATH',
-                'value': '<package_root>/../../../bin'  # append
+                'value': '<package_root>/../../../bin',
+                'method': 'append'
             }
         ]
     },
@@ -75,7 +83,7 @@ schemas = {
 for name, schema in schemas.items():
     file_path = os.path.join(ROOT, name.replace(' ', '_') + '.schema')
     with open(file_path, 'w', encoding='utf-8') as file:
-        json.dump(schemas[name], file, indent=4)
+        json.dump(schema, file, indent=4)
 
 '''
 {
