@@ -60,7 +60,7 @@ class WebPackageListModel(QAbstractListModel):
                         package_data.get('status'),
                         package_data.get('setup_schema')
                     ))
-            except OSError:
+            except IOError:
                 pass
         self.__data = tuple(items)
         self.endResetModel()
