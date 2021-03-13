@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import json
 from operator import itemgetter
+from time import sleep
 
 try:
     from PyQt5.QtWidgets import *
@@ -35,33 +36,41 @@ class WebPackageListModel(QAbstractListModel):
         if packages:
             items = packages
         else:
-            try:
-                r = requests.get('https://raw.githubusercontent.com/anvdev/'
-                                 'Houdini-Package-List/master/data.json')
-                data = json.loads(r.text)
-                if hou.getenv('username') == 'MarkWilson':  # Debug only
-                    with open(r'C:\Users\MarkWilson\Documents\Houdini-Package-List\data.json') as file:
-                        data = json.load(file)
-                for name, package_data in sorted(data.items(), key=itemgetter(0)):
-                    if not package_data.get('visible', True):
-                        continue
+            attempts = 3
+            while attempts != 0:
+                try:
+                    r = requests.get('https://raw.githubusercontent.com/anvdev/'
+                                     'Houdini-Package-List/master/data.json')
+                    data = json.loads(r.text)
+                    if hou.getenv('username') == 'MarkWilson':  # Debug only
+                        with open(r'C:\Users\MarkWilson\Documents\Houdini-Package-List\data.json') as file:
+                            data = json.load(file)
+                    break
+                except IOError:
+                    attempts -= 1
+                    sleep(0.125)
+            else:
+                data = {}
 
-                    if hversion not in VersionRange.fromPattern(package_data.get('hversion', '*')):
-                        continue
+            for name, package_data in sorted(data.items(), key=itemgetter(0)):
+                if not package_data.get('visible', True):
+                    continue
 
-                    items.append(WebPackage(
-                        name,
-                        package_data.get('description'),
-                        package_data.get('author'),
-                        package_data['source'],
-                        package_data['source_type'],
-                        package_data.get('hversion'),
-                        package_data.get('hlicense'),
-                        package_data.get('status'),
-                        package_data.get('setup_schema')
-                    ))
-            except IOError:
-                pass
+                if hversion not in VersionRange.fromPattern(package_data.get('hversion', '*')):
+                    continue
+
+                items.append(WebPackage(
+                    name,
+                    package_data.get('description'),
+                    package_data.get('author'),
+                    package_data['source'],
+                    package_data['source_type'],
+                    package_data.get('hversion'),
+                    package_data.get('hlicense'),
+                    package_data.get('status'),
+                    package_data.get('setup_schema')
+                ))
+
         self.__data = tuple(items)
         self.endResetModel()
 

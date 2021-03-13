@@ -93,30 +93,37 @@ class WebPackageInfoView(QWidget):
         # Data
         self.web_package = None
 
+    def clear(self):
+        self.name_info.setText('')
+        self.desc_info.setText('')
+        self.author_info.setText('')
+        self.hversion_info.setText('')
+        self.hlicense_info.setText('')
+        self.status_info.setText('')
+        self.source_info.setText('')
+        self.install_button.setDisabled(True)
+
     def updateFromCurrentPackage(self):
         if self.web_package is None:
-            self.name_info.setText('')
-            self.desc_info.setText('')
-            self.author_info.setText('')
-            self.hversion_info.setText('')
-            self.hlicense_info.setText('')
-            self.status_info.setText('')
-            self.source_info.setText('')
-            self.install_button.setDisabled(True)
+            self.clear()
             return
-        self.name_info.setText(self.web_package.name)
-        self.desc_info.setText(self.web_package.description or github.repoDescription(self.web_package) or '-')
-        self.author_info.setText(self.web_package.author or '-')
-        self.hversion_info.setText(self.web_package.hversion or '*')
-        self.hlicense_info.setText(fullHoudiniLicenseName(self.web_package.hlicense) or 'Commercial')
-        self.status_info.setText(fullPackageStatusName(self.web_package.status) or 'Stable')
-        if self.web_package.source != '-':
-            self.source_info.setText('GitHub: ' + self.web_package.source)
-            self.source_info.setLink(github.repoURL(*github.ownerAndRepoName(self.web_package.source)))
-        else:
-            self.source_info.setText(self.web_package.source)
-            self.source_info.setLink(None)
-        self.install_button.setEnabled(True)
+
+        try:
+            self.name_info.setText(self.web_package.name)
+            self.desc_info.setText(self.web_package.description or github.repoDescription(self.web_package) or '-')
+            self.author_info.setText(self.web_package.author or '-')
+            self.hversion_info.setText(self.web_package.hversion or '*')
+            self.hlicense_info.setText(fullHoudiniLicenseName(self.web_package.hlicense) or 'Commercial')
+            self.status_info.setText(fullPackageStatusName(self.web_package.status) or 'Stable')
+            if self.web_package.source != '-':
+                self.source_info.setText('GitHub: ' + self.web_package.source)
+                self.source_info.setLink(github.repoURL(*github.ownerAndRepoName(self.web_package.source)))
+            else:
+                self.source_info.setText(self.web_package.source)
+                self.source_info.setLink(None)
+            self.install_button.setEnabled(True)
+        except Exception:  # Todo
+            self.clear()
 
     def setWebPackage(self, web_package_item):
         self.web_package = web_package_item
