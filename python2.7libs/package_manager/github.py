@@ -100,7 +100,7 @@ class API:
         elif r.status_code == 403:
             raise ReachedAPILimit
         elif r.status_code == 404:
-            raise RepoNotFound  # Todo: explainable message
+            raise RepoNotFound(url)  # Todo: explainable message
 
     @staticmethod
     def toJson():
@@ -418,7 +418,10 @@ def repoHasUpdate(link, version, version_type, only_stable=True):
     else:  # version_type == 'version':
         if only_stable:
             latest_release_api_url = repo_api_url + '/releases/latest'
-            release_data = API.get(latest_release_api_url)
+            try:
+                release_data = API.get(latest_release_api_url)
+            except RepoNotFound:
+                return False
         else:
             releases_api_url = repo_api_url + '/releases'
             releases_data = API.get(releases_api_url)
