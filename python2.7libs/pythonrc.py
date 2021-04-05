@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import hou
+
 if hou.isUIAvailable():
     from time import time
 
