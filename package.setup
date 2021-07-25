@@ -1,8 +1,8 @@
 {
     "name": "Package Manager",
     "author": "Ivan Titov",
-    "version": "0.8.2-beta",
+    "version": "0.8.3-beta",
     "version_type": "version",
-    "source": "Houdini-Packages/Houdini-Package-Manager",
+    "source": "anvdev/Houdini-Package-Manager",
     "source_type": "github"
 }
