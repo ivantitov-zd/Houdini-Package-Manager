@@ -1,11 +1,8 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 try:
     from PyQt5.QtWidgets import *
     from PyQt5.QtGui import *
     from PyQt5.QtCore import *
+
 
     Signal = pyqtSignal
 except ImportError:
@@ -26,7 +23,7 @@ class WebPackageInfoView(QWidget):
     # Signals
     installed = Signal(WebPackage)
 
-    def __init__(self):
+    def __init__(self) -> None:
         super(WebPackageInfoView, self).__init__()
 
         main_layout = QVBoxLayout(self)
@@ -93,7 +90,7 @@ class WebPackageInfoView(QWidget):
         # Data
         self.web_package = None
 
-    def clear(self):
+    def clear(self) -> None:
         self.name_info.setText('')
         self.desc_info.setText('')
         self.author_info.setText('')
@@ -103,7 +100,7 @@ class WebPackageInfoView(QWidget):
         self.source_info.setText('')
         self.install_button.setDisabled(True)
 
-    def updateFromCurrentPackage(self):
+    def updateFromCurrentPackage(self) -> None:
         if self.web_package is None:
             self.clear()
             return
@@ -125,11 +122,11 @@ class WebPackageInfoView(QWidget):
         except Exception:  # Todo
             self.clear()
 
-    def setWebPackage(self, web_package_item):
+    def setWebPackage(self, web_package_item: WebPackage) -> None:
         self.web_package = web_package_item
         self.updateFromCurrentPackage()
 
-    def _onInstall(self):
+    def _onInstall(self) -> None:
         if self.web_package.source_type == 'github':
             if not github.installFromRepo(self.web_package):
                 return  # Cancelled
