@@ -2,7 +2,7 @@
 name = "houdini_package_manager"
 version = "0.0.0"
 readme = "README.md"
-requires-python = "3.10"
+requires-python = ">=3.10"
 
 [tool.ruff]
 src = ["package_manager"]
