@@ -1,7 +1,7 @@
 from typing import Union
 
 
-class Token(object):
+class Token:
     def __new__(cls, source) -> 'Token':
         if isinstance(source, Token):
             return source
@@ -27,7 +27,7 @@ class Token(object):
         return self.__value
 
     def __repr__(self) -> str:
-        return 'Token("{0}")'.format(self.raw)
+        return f'Token("{self.raw}")'
 
     def __str__(self) -> str:
         return self.__raw
@@ -105,7 +105,7 @@ def parse_version(version_string: str) -> tuple[tuple[Token, ...], tuple[Token, 
             break
 
     if start_index == -1:
-        return
+        return None
     # Cut redundant characters at the beginning
     version_string = version_string[start_index:]
 
@@ -151,7 +151,7 @@ def parse_version(version_string: str) -> tuple[tuple[Token, ...], tuple[Token, 
     return tuple(num_tokens), tuple(qualifier_tokens), build_metadata
 
 
-class Version(object):
+class Version:
     def __new__(cls, source: Union['Version', str]) -> 'Version':
         if isinstance(source, Version):
             return source
@@ -185,7 +185,7 @@ class Version(object):
         return self.__qualifier_tokens
 
     def __repr__(self) -> str:
-        return 'Version("{0}")'.format(self.__raw)
+        return f'Version("{self.__raw}")'
 
     def __str__(self) -> str:
         return self.__raw
@@ -286,7 +286,7 @@ class Version(object):
         return self == other or self > other
 
 
-class VersionRange(object):
+class VersionRange:
     def __init__(self, low_version: Version | None = None, high_version: Version | None = None) -> None:
         if low_version is None:
             self.low_version = Version('0')
@@ -317,11 +317,10 @@ class VersionRange(object):
         return cls(low_version, high_version)
 
     def __str__(self) -> str:
-        return 'Version Range [{0};{1}]'.format(self.low_version, self.high_version)
+        return f'Version Range [{self.low_version};{self.high_version}]'
 
     def __repr__(self) -> str:
-        return 'VersionRange({0}, {1})'.format(self.low_version.__repr__(),
-                                               self.high_version.__repr__())
+        return f'VersionRange({self.low_version.__repr__()}, {self.high_version.__repr__()})'
 
     def __contains__(self, item: Union[str, Version, 'VersionRange']) -> bool:
         if isinstance(item, (str, Version)):
@@ -339,7 +338,7 @@ class VersionRange(object):
             raise TypeError
 
 
-class VersionPattern(object):
+class VersionPattern:
     def __init__(self, pattern: str) -> None:
         self.__raw = str(pattern)
 
@@ -361,9 +360,7 @@ class VersionPattern(object):
             version = Version(item)
             return version in self.__include and \
                 version not in self.__exclude
-        elif isinstance(item, VersionRange):
-            pass
-        elif isinstance(item, VersionPattern):
+        elif isinstance(item, VersionPattern | VersionRange):
             pass
 
     def __eq__(self, other: Union[str, Version, VersionRange, 'VersionPattern']) -> bool:

@@ -1,33 +1,19 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 from typing import Any
 
+import hou
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
+
+from . import github
+from . import pypanel
+from .link_label import LinkLabel
 from .local_package import LocalPackage
 from .package import Package
-
-
-try:
-    from PyQt5.QtWidgets import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-
-
-    Signal = pyqtSignal
-except ImportError:
-    from PySide2.QtWidgets import *
-    from PySide2.QtGui import *
-    from PySide2.QtCore import *
-
-import hou
-
-from .link_label import LinkLabel
 from .path_text import prepare_path
-from .shelves import shelves_in_file, tools_in_file
-from . import github
+from .shelves import shelves_in_file
+from .shelves import tools_in_file
 from .update_options import UpdateOptions
-from . import pypanel
 
 
 class IconCache:
@@ -150,7 +136,7 @@ class PackageInfoView(QWidget):
         self.check_only_stable_toggle.toggled.connect(self._on_toggle_check_only_stable)
         update_layout.addWidget(self.check_only_stable_toggle)
 
-        # Todo: update button
+        # TODO: update button
 
         # Enable/Disable
         self.enable_button = QPushButton('Enable')
@@ -292,7 +278,7 @@ class OperatorListModel(QAbstractListModel):
             for lib_path in package.libraries():
                 hdas.extend(hou.hda.definitionsInFile(lib_path))
             self.__data = tuple(hdas)
-        except (IOError, AttributeError):
+        except (OSError, AttributeError):
             self.__data = ()
         self.endResetModel()
 
@@ -333,7 +319,7 @@ class ShelfListModel(QAbstractListModel):
             for shelf_path in package.shelves():
                 shelves.extend(shelves_in_file(shelf_path))
             self.__data = tuple(shelves)
-        except (IOError, AttributeError):
+        except (OSError, AttributeError):
             self.__data = ()
         self.endResetModel()
 
@@ -371,7 +357,7 @@ class ShelfToolListModel(QAbstractListModel):
             for shelf_path in package.shelves():
                 tools.extend(tools_in_file(shelf_path))
             self.__data = tuple(tools)
-        except (IOError, AttributeError):
+        except (OSError, AttributeError):
             self.__data = ()
         self.endResetModel()
 
@@ -411,7 +397,7 @@ class PyPanelListModel(QAbstractListModel):
             for panel_path in package.panels():
                 panels.extend(pypanel.interfaces_in_file(panel_path))
             self.__data = tuple(panels)
-        except (IOError, AttributeError):
+        except (OSError, AttributeError):
             self.__data = ()
         self.endResetModel()
 

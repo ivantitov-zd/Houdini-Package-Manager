@@ -1,25 +1,15 @@
 import json
 from typing import Any
 
+import hou
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
+
 from package_manager.package import Package
 
 
-try:
-    from PyQt5.QtWidgets import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-
-
-    Signal = pyqtSignal
-except ImportError:
-    from PySide2.QtWidgets import *
-    from PySide2.QtGui import *
-    from PySide2.QtCore import *
-
-import hou
-
-
-class UpdateOptions(object):
+class UpdateOptions:
     _instance = None
 
     def __new__(cls, *args, **kwargs) -> 'UpdateOptions':
@@ -37,7 +27,7 @@ class UpdateOptions(object):
         try:
             with open(self._options_file_path) as file:
                 options_data = json.load(file)
-        except (IOError, ValueError):
+        except (OSError, ValueError):
             options_data = {}
 
         with open(self._options_file_path, 'w') as file:
@@ -49,8 +39,8 @@ class UpdateOptions(object):
             with open(self._options_file_path) as file:
                 options_data = json.load(file)
                 return options_data.get(field_name)
-        except (IOError, ValueError):
-            return
+        except (OSError, ValueError):
+            return None
 
     def set_field_for_package(self, package: Package, field_name: str, value: Any) -> None:
         try:
@@ -58,10 +48,10 @@ class UpdateOptions(object):
                 options_data = json.load(file)
             if 'packages' not in options_data:
                 options_data['packages'] = {}
-        except (IOError, ValueError):
+        except (OSError, ValueError):
             options_data = {
                 'check_on_startup': True,
-                'packages': {}
+                'packages': {},
             }
 
         package_full_name = package.source.replace('/', '_').lower()
@@ -79,7 +69,7 @@ class UpdateOptions(object):
                 package_full_name = package.source.replace('/', '_').lower()
                 package_options_data = options_data['packages'][package_full_name]
                 return package_options_data.get(field_name)
-        except (IOError, ValueError, KeyError):
+        except (OSError, ValueError, KeyError):
             return None
 
     def set_check_on_startup(self, enable: bool) -> None:
@@ -90,7 +80,7 @@ class UpdateOptions(object):
             with open(self._options_file_path) as file:
                 options_data = json.load(file)
             return options_data.get('check_on_startup', False)
-        except (IOError, ValueError):
+        except (OSError, ValueError):
             # noinspection PyTypeChecker
             reply = QMessageBox.question(None, 'Package Manager: Update',
                                          'Check for updates on startup?',

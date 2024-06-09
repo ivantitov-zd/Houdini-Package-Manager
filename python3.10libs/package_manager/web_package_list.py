@@ -3,21 +3,15 @@ from operator import itemgetter
 from time import sleep
 from typing import Any
 
-
-try:
-    from PyQt5.QtWidgets import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-except ImportError:
-    from PySide2.QtWidgets import *
-    from PySide2.QtGui import *
-    from PySide2.QtCore import *
-
 import hou
 import requests
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
+from .version import Version
+from .version import VersionRange
 from .web_package import WebPackage
-from .version import Version, VersionRange
 
 
 class WebPackageListModel(QAbstractListModel):
@@ -44,7 +38,7 @@ class WebPackageListModel(QAbstractListModel):
                         with open(r'C:\Users\MarkWilson\Documents\Houdini-Package-List\data.json') as file:
                             data = json.load(file)
                     break
-                except IOError:
+                except OSError:
                     attempts -= 1
                     sleep(0.125)
             else:
@@ -66,7 +60,7 @@ class WebPackageListModel(QAbstractListModel):
                     package_data.get('hversion'),
                     package_data.get('hlicense'),
                     package_data.get('status'),
-                    package_data.get('setup_schema')
+                    package_data.get('setup_schema'),
                 ))
 
         self.__data = tuple(items)

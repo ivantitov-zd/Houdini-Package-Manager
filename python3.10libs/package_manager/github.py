@@ -3,24 +3,19 @@ import json
 import os
 import shutil
 import zipfile
+from collections.abc import Iterable
 from typing import Any
-from typing import Iterable
 
 import hou
 import requests
-
-
-try:
-    from PyQt5.QtWidgets import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-except ImportError:
-    from PySide2.QtWidgets import *
-    from PySide2.QtGui import *
-    from PySide2.QtCore import *
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
 from package_manager.package import is_package
-from .houdini_license import HOUDINI_COMMERCIAL_LICENSE, full_houdini_license_name
+
+from .houdini_license import HOUDINI_COMMERCIAL_LICENSE
+from .houdini_license import full_houdini_license_name
 from .local_package import LocalPackage
 from .package import Package
 from .version import Version
@@ -47,7 +42,7 @@ class CacheItem:
         return {
             'data': self.data,
             'etag': self.etag,
-            'last_modified': self.last_modified
+            'last_modified': self.last_modified,
         }
 
     @classmethod
@@ -63,16 +58,16 @@ class API:
         headers_data = {
             'User-Agent': 'Houdini-Package-Manager',
             'Accept': 'application / vnd.github.v3 + json',
-            'Authorization': ('token ' +
-                              '55993b807df3eb5541c6' +
-                              'bcd439d69aa335fcda89')
+            'Authorization': ('token '
+                              '55993b807df3eb5541c6'
+                              'bcd439d69aa335fcda89'),
         }
         if headers:
             headers_data.update(headers)
 
         try:
             API.load_from_file()
-        except IOError:
+        except OSError:
             pass
 
         if url in API.cache_data:
@@ -99,7 +94,7 @@ class API:
         elif response.status_code == 403:
             raise ReachedAPILimitError
         elif response.status_code == 404:
-            raise RepoNotFoundError(url)  # Todo: explainable message
+            raise RepoNotFoundError(url)  # TODO: explainable message
 
     @staticmethod
     def to_json() -> dict:
@@ -137,12 +132,12 @@ def owner_and_repo_name(source: str) -> list[str]:
 
 
 def repo_url(owner: str, repo_name: str) -> str:
-    return 'https://github.com/{0}/{1}'.format(owner, repo_name)
+    return f'https://github.com/{owner}/{repo_name}'
 
 
 def is_package_repo(source: str) -> bool:
     repo_owner, repo_name = owner_and_repo_name(source)
-    api_repo_url = 'https://api.github.com/repos/{0}/{1}/contents'.format(repo_owner, repo_name)
+    api_repo_url = f'https://api.github.com/repos/{repo_owner}/{repo_name}/contents'
     repo_content = API.get(api_repo_url)
     items = tuple(file_data['name'] for file_data in repo_content)
     return is_package(items)
@@ -152,7 +147,7 @@ def extract_repo_zip(
         file_path: str,
         repo_data: dict,
         dst_location: str = '$HOUDINI_USER_PREF_DIR',
-        dst_name: str | None = None
+        dst_name: str | None = None,
 ) -> str:
     if not dst_name:
         _, extension = os.path.splitext(os.path.basename(file_path))
@@ -181,7 +176,7 @@ def repo_description(package_or_link: str | Package) -> str:
         repo_owner, repo_name = owner_and_repo_name(package_or_link.source)
     else:  # package_or_link is link
         repo_owner, repo_name = owner_and_repo_name(package_or_link)
-    return API.get('https://api.github.com/repos/{0}/{1}'.format(repo_owner, repo_name)).get('description')
+    return API.get(f'https://api.github.com/repos/{repo_owner}/{repo_name}').get('description')
 
 
 def update_package_data_file(
@@ -196,7 +191,7 @@ def update_package_data_file(
     try:
         with open(data_file_path) as file:
             data = json.load(file)
-    except (IOError, ValueError):
+    except (OSError, ValueError):
         data = {}
     package = package or WebPackage()
     if not data.get('name') or update:
@@ -209,7 +204,7 @@ def update_package_data_file(
         data['source'] = package.source or repo_data['full_name'] or data.get('source')
     if not data.get('source_type'):
         data['source_type'] = package.source_type or 'github'
-    # Todo: or Version(data['version']) < version  # consider type
+    # TODO: or Version(data['version']) < version  # consider type
     if update or not data.get('version') or not data.get('version_type'):
         data['version'] = version
         data['version_type'] = version_type
@@ -231,7 +226,7 @@ def download_file(url: str, dst_location: str = '$TEMP') -> str:
     zip_file_path = os.path.join(hou.expandString(dst_location), os.path.basename(url) + '.zip')
     with open(zip_file_path, 'wb') as file:
         response = requests.get(url, timeout=5)
-        file.write(response.content)  # Todo: sequentially
+        file.write(response.content)  # TODO: sequentially
     return zip_file_path
 
 
@@ -341,7 +336,7 @@ def install_from_repo(
         dst_location: str = '$HOUDINI_USER_PREF_DIR',
         update: bool = False,
         only_stable: bool = True,
-        setup_schema=None
+        setup_schema=None,
 ) -> bool:
     if isinstance(package_or_link, Package):
         package = package_or_link
@@ -350,7 +345,7 @@ def install_from_repo(
         repo_owner, repo_name = owner_and_repo_name(package_or_link)
         package = WebPackage()
 
-    repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(repo_owner, repo_name)
+    repo_api_url = f'https://api.github.com/repos/{repo_owner}/{repo_name}'
     repo_data = API.get(repo_api_url)
 
     releases_api_url = repo_api_url + '/releases'
@@ -361,7 +356,7 @@ def install_from_repo(
     suitable_releases = []
     for release_data in releases:
         if only_stable and release_data['prerelease'] or release_data.get('draft'):
-            continue  # Todo: Check release type by version
+            continue  # TODO: Check release type by version
         suitable_releases.append(release_data)
 
     if not suitable_releases:
@@ -400,7 +395,7 @@ def install_from_repo(
         repo_owner = repo_data['owner']['login']
         repo_name = repo_data['name']
         branch = repo_data.get('default_branch', 'master')
-        asset_url = 'https://github.com/{0}/{1}/zipball/{2}'.format(repo_owner, repo_name, branch)
+        asset_url = f'https://github.com/{repo_owner}/{repo_name}/zipball/{branch}'
 
     zip_file = download_file(asset_url)
     if update:
@@ -425,16 +420,16 @@ def repo_has_update(
         link: str,
         version: str,
         version_type: str,
-        only_stable: bool = True
+        only_stable: bool = True,
 ) -> bool:
     repo_owner, repo_name = owner_and_repo_name(link)
 
-    repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(repo_owner, repo_name)
+    repo_api_url = f'https://api.github.com/repos/{repo_owner}/{repo_name}'
     if version_type == 'time_github':
         repo_data = API.get(repo_api_url)
         latest_version = parse_timestamp(repo_data['pushed_at'])
         version = parse_timestamp(version)
-        # Todo: support only_stable
+        # TODO: support only_stable
     else:  # version_type == 'version':
         if only_stable:
             latest_release_api_url = repo_api_url + '/releases/latest'

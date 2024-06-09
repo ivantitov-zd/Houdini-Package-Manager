@@ -36,5 +36,5 @@ def full_package_status_name(name_or_status: str | int) -> str | None:
         PROTOTYPE: 'Prototype',
         ALPHA: 'Alpha',
         BETA: 'Beta',
-        STABLE: 'Stable'
+        STABLE: 'Stable',
     }.get(status)

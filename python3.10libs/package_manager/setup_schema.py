@@ -18,7 +18,7 @@ def find_package_root_path(path: str) -> str:
             scores.append(score)
     if not paths:
         raise FileNotFoundError('No package found')
-    return sorted(zip(paths, scores), key=itemgetter(1))[-1][0]
+    return sorted(zip(paths, scores, strict=False), key=itemgetter(1))[-1][0]
 
 
 def find_digital_assets_roots(package_root_path: str) -> tuple[str, ...]:
@@ -42,12 +42,12 @@ def make_setup_schema(path: str) -> dict:
     try:
         package_root_path = find_package_root_path(path)
     except FileNotFoundError:
-        return
+        return None
     package_root = package_root_path.replace(path, '').strip('\\/').replace('\\', '/')
     hda_roots = map(lambda p: p.replace(package_root_path, '').strip('\\/').replace('\\', '/'),
                     find_digital_assets_roots(package_root_path))
     schema = {
         'root': package_root,
-        'hda_roots': tuple(hda_roots)
+        'hda_roots': tuple(hda_roots),
     }
     return schema

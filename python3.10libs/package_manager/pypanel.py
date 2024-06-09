@@ -1,7 +1,7 @@
 from xml.etree import ElementTree
 
 
-class PyPanelItem(object):
+class PyPanelItem:
     def __init__(self, label: str, name: str, icon: str) -> None:
         self.__label = label
         self.__name = name
@@ -25,6 +25,6 @@ def interfaces_in_file(file_path: str) -> tuple[PyPanelItem, ...]:
             panels.append(PyPanelItem(label=elem.get('label'),
                                       name=elem.get('name'),
                                       icon=elem.get('icon')))
-    except (IOError, ElementTree.ParseError):
+    except (OSError, ElementTree.ParseError):
         pass
     return tuple(panels)

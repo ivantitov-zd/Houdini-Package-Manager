@@ -36,5 +36,5 @@ def full_houdini_license_name(name_or_lic: str | hou.licenseCategoryType) -> str
         HOUDINI_COMMERCIAL_LICENSE: 'Commercial',
         HOUDINI_INDIE_LICENSE: 'Indie',
         HOUDINI_EDUCATION_LICENSE: 'Education',
-        HOUDINI_APPRENTICE_LICENSE: 'Apprentice'
+        HOUDINI_APPRENTICE_LICENSE: 'Apprentice',
     }.get(lic)

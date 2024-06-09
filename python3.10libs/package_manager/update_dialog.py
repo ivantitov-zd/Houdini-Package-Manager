@@ -1,19 +1,12 @@
-from .package import Package
-
-
-try:
-    from PyQt5.QtWidgets import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-except ImportError:
-    from PySide2.QtWidgets import *
-    from PySide2.QtGui import *
-    from PySide2.QtCore import *
-
 import hou
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
-from .update_list import UpdateListModel, UpdateListView
 from . import github
+from .package import Package
+from .update_list import UpdateListModel
+from .update_list import UpdateListView
 
 
 class UpdateDialog(QDialog):
@@ -86,7 +79,7 @@ class UpdateDialog(QDialog):
         self.current_version_label.setText(package.version)
         if package.source_type == 'github':
             releases_api_url = 'https://api.github.com/repos/{0}/{1}/releases'.format(
-                *github.owner_and_repo_name(package.source)
+                *github.owner_and_repo_name(package.source),
             )
             releases_data = github.API.get(releases_api_url)
             if releases_data:
@@ -94,7 +87,8 @@ class UpdateDialog(QDialog):
                 new_version = last_version_data['tag_name']
                 changes = last_version_data['body']
             else:
-                repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(*github.owner_and_repo_name(package.source))
+                repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(
+                    *github.owner_and_repo_name(package.source))
                 repo_data = github.API.get(repo_api_url)
                 new_version = repo_data['pushed_at']
                 changes = 'No information'

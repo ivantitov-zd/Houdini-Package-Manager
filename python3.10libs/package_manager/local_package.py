@@ -1,12 +1,13 @@
 import json
 import os
+from collections.abc import Generator
 from typing import Any
-from typing import Generator
 
 import hou
 
 from .houdini_license import full_houdini_license_name
-from .package import Package, is_package
+from .package import Package
+from .package import is_package
 from .package_status import full_package_status_name
 from .setup_schema import make_setup_schema
 
@@ -69,17 +70,17 @@ class LocalPackage(Package):
         self.package_file = os.path.normpath(package_file).replace('\\', '/')
 
         if not os.path.isfile(package_file):
-            raise IOError('File "{0}" not found'.format(package_file))
+            raise OSError(f'File "{package_file}" not found')
 
         with open(package_file) as file:
             data = json.load(file)
 
         self.content_path = os.path.normpath(hou.expandString(data['path'])).replace('\\', '/')
         if not os.path.isdir(self.content_path):
-            raise IOError(self.content_path)
+            raise OSError(self.content_path)
 
         if not is_package_folder(self.content_path):
-            raise NotPackageError('Folder "{0}" is not a package'.format(self.content_path))
+            raise NotPackageError(f'Folder "{self.content_path}" is not a package')
 
         setup_file = os.path.join(self.content_path, 'package.setup')
         if os.path.isfile(setup_file):
@@ -137,15 +138,15 @@ class LocalPackage(Package):
 
     def is_enabled(self) -> bool:
         try:
-            with open(self.package_file, 'r', encoding='utf-8') as file:
+            with open(self.package_file, encoding='utf-8') as file:
                 data = json.load(file)
                 return data.get('enable', True)
-        except IOError:
-            return False  # Todo: raise NotInstalledError?
+        except OSError:
+            return False  # TODO: raise NotInstalledError?
 
     def enable(self, enable: bool = True) -> None:
-        # Todo: check if not installed
-        with open(self.package_file, 'r') as file:
+        # TODO: check if not installed
+        with open(self.package_file) as file:
             data = json.load(file)
         with open(self.package_file, 'w') as file:
             data['enable'] = enable
@@ -158,7 +159,7 @@ class LocalPackage(Package):
         if not os.path.exists(content_path) or not os.path.isdir(content_path):
             raise FileNotFoundError('Package folder not found')
 
-        name = package_name_from_content(content_path).replace(' ', '_')  # Todo: what if name missing
+        name = package_name_from_content(content_path).replace(' ', '_')  # TODO: what if name missing
         author = package_author_from_content(content_path)
         package_file_name = name + '.json'
         if author:
@@ -171,7 +172,7 @@ class LocalPackage(Package):
         if not setup_schema:
             data = {
                 'enable': enable,
-                'path': content_path
+                'path': content_path,
             }
         else:
             package_root_path = os.path.join(content_path, setup_schema['root']).replace('\\', '/')
@@ -179,24 +180,24 @@ class LocalPackage(Package):
                 'enable': enable,
                 'path': package_root_path,
                 'env': [
-                    {name.upper(): package_root_path}
-                ]
+                    {name.upper(): package_root_path},
+                ],
             }
-            if 'hda_roots' in setup_schema and setup_schema['hda_roots']:
+            if setup_schema.get('hda_roots'):
                 hda_roots_vars = {
-                    'HOUDINI_OTLSCAN_PATH': list(map(lambda r: '${0}/{1}'.format(name.upper(), r),
-                                                      setup_schema['hda_roots']))
+                    'HOUDINI_OTLSCAN_PATH': list(map(lambda r: f'${name.upper()}/{r}',
+                                                     setup_schema['hda_roots'])),
                 }
                 data['env'].append(hda_roots_vars)
         with open(package_file, 'w') as file:
             json.dump(data, file, indent=4)
 
     def uninstall(self) -> None:
-        # Todo: optional remove package content folder
+        # TODO: optional remove package content folder
         os.remove(self.package_file)
 
     def __repr__(self) -> str:
-        return 'Package(r"{0}")'.format(self.package_file)
+        return f'Package(r"{self.package_file}")'
 
     def __str__(self) -> str:
         return self.content_path
@@ -223,14 +224,14 @@ def find_installed_packages() -> tuple[LocalPackage, ...]:
 
     if hou.getenv('HSITE') is not None:
         major, minor, build = hou.applicationVersion()
-        packages_path = hou.expandString('$HSITE/houdini{0}.{1}/packages'.format(major, minor))
+        packages_path = hou.expandString(f'$HSITE/houdini{major}.{minor}/packages')
         json_paths.extend(jsons_from_folder_alphabetical(packages_path))
 
     if hou.getenv('HOUDINI_PACKAGE_DIR') is not None:
         packages_path = hou.expandString('$HOUDINI_PACKAGE_DIR')
         json_paths.extend(jsons_from_folder_alphabetical(packages_path))
 
-    # Todo: support dynamic setting of the package dir if possible
+    # TODO: support dynamic setting of the package dir if possible
 
     packages = []
     for path in json_paths:

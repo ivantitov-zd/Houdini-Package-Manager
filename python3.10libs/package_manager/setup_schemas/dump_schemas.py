@@ -1,6 +1,7 @@
 import json
 import os
 
+
 ROOT = os.path.dirname(__file__)
 
 schemas = {
@@ -10,35 +11,35 @@ schemas = {
         'env': [
             {
                 'name': 'QLIB',
-                'value': '<package_root>'
+                'value': '<package_root>',
             },
             {
                 'name': 'QOTL',
-                'value': '$QLIB/otls'
-            }
+                'value': '$QLIB/otls',
+            },
         ],
         'hda_roots': [
             {
                 'name': 'Base',
-                'path': '$QOTL/base'
+                'path': '$QOTL/base',
             },
             {
                 'name': 'Future',
                 'path': '$QOTL/future',
-                'optional': True
+                'optional': True,
             },
             {
                 'name': 'Experimental',
                 'path': '$QOTL/experimental',
-                'optional': True
+                'optional': True,
             },
             {
                 'name': 'Graveyard',
                 'path': '$QOTL/graveyard',
                 'optional': True,
-                'enabled': False
-            }
-        ]
+                'enabled': False,
+            },
+        ],
     },
     'MOPS': {
         'name': 'MOPS',
@@ -46,23 +47,23 @@ schemas = {
         'env': [
             {
                 'name': 'MOPS',
-                'value': '<package_root>'
-            }
-        ]
+                'value': '<package_root>',
+            },
+        ],
     },
     'Redshift': {
         'name': 'Redshift',
         'root': {
             'path': '<package_root>/../$HOUDINI_VERSION',
-            'method': 'append'
+            'method': 'append',
         },
         'env': [
             {
                 'name': 'PATH',
                 'value': '<package_root>/../../../bin',
-                'method': 'append'
-            }
-        ]
+                'method': 'append',
+            },
+        ],
     },
     'SideFX Labs': {
         'name': 'SideFX Labs',
@@ -70,14 +71,14 @@ schemas = {
         'env': [
             {
                 'name': 'sidefxlabs_current_version',
-                'value': 'MANUAL'
+                'value': 'MANUAL',
             },
             {
                 'name': 'PATH',
-                'value': '<package_root>/bin'
-            }
-        ]
-    }
+                'value': '<package_root>/bin',
+            },
+        ],
+    },
 }
 
 for name, schema in schemas.items():

@@ -1,7 +1,7 @@
 from xml.etree import ElementTree
 
 
-class ShelfItem(object):
+class ShelfItem:
     def __init__(self, label: str, name: str) -> None:
         self.__label = label
         self.__name = name
@@ -20,12 +20,12 @@ def shelves_in_file(file_path: str) -> tuple[ShelfItem, ...]:
         for elem in tree.getroot().iter('toolshelf'):
             shelves.append(ShelfItem(label=elem.get('label'),
                                      name=elem.get('name')))
-    except (IOError, ElementTree.ParseError):
+    except (OSError, ElementTree.ParseError):
         pass
     return tuple(shelves)
 
 
-class ShelfToolItem(object):
+class ShelfToolItem:
     def __init__(self, label: str, name: str, icon: str) -> None:
         self.__label = label
         self.__name = name
@@ -49,6 +49,6 @@ def tools_in_file(file_path: str) -> tuple[ShelfToolItem, ...]:
             tools.append(ShelfToolItem(label=elem.get('label'),
                                        name=elem.get('name'),
                                        icon=elem.get('icon')))
-    except (IOError, ElementTree.ParseError):
+    except (OSError, ElementTree.ParseError):
         pass
     return tuple(tools)

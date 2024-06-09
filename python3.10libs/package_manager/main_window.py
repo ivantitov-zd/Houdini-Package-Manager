@@ -1,20 +1,14 @@
-try:
-    from PyQt5.QtWidgets import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-except ImportError:
-    from PySide2.QtWidgets import *
-    from PySide2.QtGui import *
-    from PySide2.QtCore import *
-
 import hou
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
 from .local_package import find_installed_packages
-from .package_list import *
 from .local_package_content import *
-from .web_package_list import *
-from .web_package_content import WebPackageInfoView
+from .package_list import *
 from .settings import SettingsWidget
+from .web_package_content import WebPackageInfoView
+from .web_package_list import *
 
 
 class MainWindow(QWidget):

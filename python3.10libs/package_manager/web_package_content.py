@@ -1,22 +1,13 @@
-try:
-    from PyQt5.QtWidgets import *
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-
-
-    Signal = pyqtSignal
-except ImportError:
-    from PySide2.QtWidgets import *
-    from PySide2.QtGui import *
-    from PySide2.QtCore import *
-
 import hou
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
-from .link_label import LinkLabel
 from . import github
-from .web_package import WebPackage
 from .houdini_license import full_houdini_license_name
+from .link_label import LinkLabel
 from .package_status import full_package_status_name
+from .web_package import WebPackage
 
 
 class WebPackageInfoView(QWidget):
@@ -119,7 +110,7 @@ class WebPackageInfoView(QWidget):
                 self.source_info.setText(self.web_package.source)
                 self.source_info.set_link(None)
             self.install_button.setEnabled(True)
-        except Exception:  # Todo
+        except Exception:  # TODO
             self.clear()
 
     def set_web_package(self, web_package_item: WebPackage) -> None:
