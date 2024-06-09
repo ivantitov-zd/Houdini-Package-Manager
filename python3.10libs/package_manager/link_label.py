@@ -1,8 +1,5 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 import webbrowser
+
 
 try:
     from PyQt5.QtWidgets import *
@@ -14,12 +11,12 @@ except ImportError:
     from PySide2.QtCore import *
 
 
-def isLink(url):
+def isLink(url: str) -> bool:
     return url.startswith(('http:', 'https:', 'ftp:', 'www.', 'file:'))
 
 
 class LinkLabel(QLabel):
-    def __init__(self, text='', link=None):
+    def __init__(self, text: str = '', link: str | None = None) -> None:
         super(LinkLabel, self).__init__(text)
 
         self.setToolTip('Open Link')
@@ -32,10 +29,10 @@ class LinkLabel(QLabel):
         self.menu = QMenu(self)
         self.menu.addAction('Copy', lambda: QApplication.clipboard().setText(self.__link))
 
-    def link(self):
+    def link(self) -> str | None:
         return self.__link
 
-    def setLink(self, url):
+    def setLink(self, url: str) -> None:
         if not url:
             url = self.text()
         if isLink(url):
@@ -45,7 +42,7 @@ class LinkLabel(QLabel):
             self.__link = None
             self.setCursor(Qt.ArrowCursor)
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
         if event.button() == Qt.LeftButton and self.__link:
             webbrowser.open(self.__link)
         elif event.button() == Qt.RightButton and self.__link:
