@@ -33,8 +33,8 @@ def fullHoudiniLicenseName(name_or_lic: str | hou.licenseCategoryType) -> str | 
     else:
         return None
     return {
-        HOUDINI_COMMERCIAL_LICENSE: u'Commercial',
-        HOUDINI_INDIE_LICENSE: u'Indie',
-        HOUDINI_EDUCATION_LICENSE: u'Education',
-        HOUDINI_APPRENTICE_LICENSE: u'Apprentice'
+        HOUDINI_COMMERCIAL_LICENSE: 'Commercial',
+        HOUDINI_INDIE_LICENSE: 'Indie',
+        HOUDINI_EDUCATION_LICENSE: 'Education',
+        HOUDINI_APPRENTICE_LICENSE: 'Apprentice'
     }.get(lic)

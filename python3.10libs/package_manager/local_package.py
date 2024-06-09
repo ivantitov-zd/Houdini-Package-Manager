@@ -87,17 +87,17 @@ class LocalPackage(Package):
                 data = json.load(file)
         else:
             data = {}
-        self.name = data.get(u'name') or os.path.basename(self.content_path)
-        self.description = data.get(u'description')
-        self.source = data.get(u'source')
-        self.source_type = data.get(u'source_type')
-        self.author = data.get(u'author')
-        self.version = data.get(u'version')
-        self.version_type = data.get(u'version_type')
-        self.hversion = data.get(u'hversion')
-        self.hlicense = fullHoudiniLicenseName(data.get(u'hlicense'))
-        self.status = fullPackageStatusName(data.get(u'status'))
-        self.setup_schema = data.get(u'setup_schema')
+        self.name = data.get('name') or os.path.basename(self.content_path)
+        self.description = data.get('description')
+        self.source = data.get('source')
+        self.source_type = data.get('source_type')
+        self.author = data.get('author')
+        self.version = data.get('version')
+        self.version_type = data.get('version_type')
+        self.hversion = data.get('hversion')
+        self.hlicense = fullHoudiniLicenseName(data.get('hlicense'))
+        self.status = fullPackageStatusName(data.get('status'))
+        self.setup_schema = data.get('setup_schema')
 
     def files(
             self,
@@ -139,7 +139,7 @@ class LocalPackage(Package):
         try:
             with open(self.package_file, 'r', encoding='utf-8') as file:
                 data = json.load(file)
-                return data.get(u'enable', True)
+                return data.get('enable', True)
         except IOError:
             return False  # Todo: raise NotInstalledError?
 
@@ -148,7 +148,7 @@ class LocalPackage(Package):
         with open(self.package_file, 'r') as file:
             data = json.load(file)
         with open(self.package_file, 'w') as file:
-            data[u'enable'] = enable
+            data['enable'] = enable
             json.dump(data, file, indent=4)
 
     @staticmethod
@@ -170,24 +170,24 @@ class LocalPackage(Package):
         setup_schema = setup_schema or makeSetupSchema(content_path)
         if not setup_schema:
             data = {
-                u'enable': enable,
-                u'path': content_path
+                'enable': enable,
+                'path': content_path
             }
         else:
             package_root_path = os.path.join(content_path, setup_schema['root']).replace('\\', '/')
             data = {
-                u'enable': enable,
-                u'path': package_root_path,
-                u'env': [
+                'enable': enable,
+                'path': package_root_path,
+                'env': [
                     {name.upper(): package_root_path}
                 ]
             }
             if 'hda_roots' in setup_schema and setup_schema['hda_roots']:
                 hda_roots_vars = {
-                    u'HOUDINI_OTLSCAN_PATH': list(map(lambda r: '${0}/{1}'.format(name.upper(), r),
+                    'HOUDINI_OTLSCAN_PATH': list(map(lambda r: '${0}/{1}'.format(name.upper(), r),
                                                       setup_schema['hda_roots']))
                 }
-                data[u'env'].append(hda_roots_vars)
+                data['env'].append(hda_roots_vars)
         with open(package_file, 'w') as file:
             json.dump(data, file, indent=4)
 

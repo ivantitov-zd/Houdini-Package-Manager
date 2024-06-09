@@ -32,9 +32,9 @@ def fullPackageStatusName(name_or_status: str | int) -> str | None:
     else:  # isinstance(name_or_lic, int):
         status = name_or_status
     return {
-        DEVELOPMENT: u'Development',
-        PROTOTYPE: u'Prototype',
-        ALPHA: u'Alpha',
-        BETA: u'Beta',
-        STABLE: u'Stable'
+        DEVELOPMENT: 'Development',
+        PROTOTYPE: 'Prototype',
+        ALPHA: 'Alpha',
+        BETA: 'Beta',
+        STABLE: 'Stable'
     }.get(status)
