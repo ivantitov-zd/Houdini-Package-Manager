@@ -1,27 +1,23 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 from xml.etree import ElementTree
 
 
 class PyPanelItem(object):
-    def __init__(self, label, name, icon):
+    def __init__(self, label: str, name: str, icon: str) -> None:
         self.__label = label
         self.__name = name
         self.__icon = icon
 
-    def label(self):
+    def label(self) -> str:
         return self.__label
 
-    def name(self):
+    def name(self) -> str:
         return self.__name
 
-    def icon(self):
+    def icon(self) -> str:
         return self.__icon
 
 
-def interfacesInFile(file_path):
+def interfacesInFile(file_path: str) -> tuple[PyPanelItem, ...]:
     panels = []
     try:
         tree = ElementTree.parse(file_path)
