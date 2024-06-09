@@ -1,7 +1,3 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 try:
     from PyQt5.QtWidgets import *
     from PyQt5.QtGui import *
@@ -15,7 +11,7 @@ from .update_options import UpdateOptions
 
 
 class SettingsWidget(QWidget):
-    def __init__(self):
+    def __init__(self) -> None:
         super(SettingsWidget, self).__init__()
 
         # Layout
@@ -55,7 +51,7 @@ class SettingsWidget(QWidget):
         # revert_button = QPushButton('Revert')
         # buttons_layout.addWidget(revert_button)
 
-    def updateSettings(self):
+    def updateSettings(self) -> None:
         self.check_on_startup_toggle.blockSignals(True)
         self.check_on_startup_toggle.setChecked(UpdateOptions().checkOnStartup())
         self.check_on_startup_toggle.blockSignals(False)
