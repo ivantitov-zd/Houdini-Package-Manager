@@ -1,13 +1,19 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 from .package import Package
 
 
 class WebPackage(Package):
-    def __init__(self, name=None, description=None, author=None, source=None, source_type=None,
-                 hversion=None, hlicense=None, status=None, setup_schema=None):
+    def __init__(
+            self,
+            name: str | None = None,
+            description: str | None = None,
+            author: str | None = None,
+            source: str | None = None,
+            source_type: str | None = None,
+            hversion: str | None = None,
+            hlicense: str | None = None,
+            status: str | None = None,
+            setup_schema: str | None = None,
+    ) -> None:
         self.name = name
         self.description = description
         self.author = author
