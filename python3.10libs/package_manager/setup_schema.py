@@ -1,18 +1,14 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 import os
 from operator import itemgetter
 
 from .package import packageScore
 
 
-def dirPackageScore(path):
+def dirPackageScore(path: str) -> int:
     return packageScore(os.listdir(path))
 
 
-def findPackageRootPath(path):
+def findPackageRootPath(path: str) -> str:
     paths = []
     scores = []
     for root, folders, files in os.walk(path):
@@ -25,7 +21,7 @@ def findPackageRootPath(path):
     return sorted(zip(paths, scores), key=itemgetter(1))[-1][0]
 
 
-def findDigitalAssetsRoots(package_root_path):
+def findDigitalAssetsRoots(package_root_path: str) -> tuple[str, ...]:
     paths = []
     for root, folders, files in os.walk(package_root_path):
         if root.lower() == os.path.join(package_root_path, 'otls').lower():
@@ -42,7 +38,7 @@ def findDigitalAssetsRoots(package_root_path):
     return tuple(paths)
 
 
-def makeSetupSchema(path):
+def makeSetupSchema(path: str) -> dict:
     try:
         package_root_path = findPackageRootPath(path)
     except FileNotFoundError:
@@ -50,6 +46,8 @@ def makeSetupSchema(path):
     package_root = package_root_path.replace(path, '').strip('\\/').replace('\\', '/')
     hda_roots = map(lambda p: p.replace(package_root_path, '').strip('\\/').replace('\\', '/'),
                     findDigitalAssetsRoots(package_root_path))
-    schema = {'root': package_root,
-              'hda_roots': tuple(hda_roots)}
+    schema = {
+        'root': package_root,
+        'hda_roots': tuple(hda_roots)
+    }
     return schema
