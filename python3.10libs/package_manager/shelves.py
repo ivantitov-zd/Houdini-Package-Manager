@@ -6,18 +6,18 @@ from xml.etree import ElementTree
 
 
 class ShelfItem(object):
-    def __init__(self, label, name):
+    def __init__(self, label: str, name: str) -> None:
         self.__label = label
         self.__name = name
 
-    def label(self):
+    def label(self) -> str:
         return self.__label
 
-    def name(self):
+    def name(self) -> str:
         return self.__name
 
 
-def shelvesInFile(file_path):
+def shelvesInFile(file_path: str) -> tuple[ShelfItem, ...]:
     shelves = []
     try:
         tree = ElementTree.parse(file_path)
@@ -30,22 +30,22 @@ def shelvesInFile(file_path):
 
 
 class ShelfToolItem(object):
-    def __init__(self, label, name, icon):
+    def __init__(self, label: str, name: str, icon: str) -> None:
         self.__label = label
         self.__name = name
         self.__icon = icon
 
-    def label(self):
+    def label(self) -> str:
         return self.__label
 
-    def name(self):
+    def name(self) -> str:
         return self.__name
 
-    def icon(self):
+    def icon(self) -> str:
         return self.__icon
 
 
-def toolsInFile(file_path):
+def toolsInFile(file_path: str) -> tuple[ShelfToolItem, ...]:
     tools = []
     try:
         tree = ElementTree.parse(file_path)
