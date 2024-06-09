@@ -1,6 +1,6 @@
-# coding: utf-8
+from typing import Any
+from typing import Collection
 
-from __future__ import print_function
 
 try:
     from PyQt5.QtWidgets import *
@@ -19,20 +19,20 @@ class PackageListModel(QAbstractListModel):
     ACTIVE_ON_ICON = hou.qt.Icon('SCENEGRAPH_active_on', 16, 16)
     ACTIVE_OFF_ICON = hou.qt.Icon('SCENEGRAPH_active_off', 16, 16)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super(PackageListModel, self).__init__(parent)
 
         self.__data = ()
 
-    def setPackageList(self, packages):
+    def setPackageList(self, packages: Collection[dict]) -> None:
         self.beginResetModel()
         self.__data = tuple(packages)
         self.endResetModel()
 
-    def rowCount(self, parent):
+    def rowCount(self, parent: QModelIndex) -> int:
         return len(self.__data)
 
-    def data(self, index, role):
+    def data(self, index: QModelIndex, role: int = Qt.DisplayRole) -> Any:
         item = self.__data[index.row()]
         if role == Qt.DisplayRole:
             return item.name
@@ -46,7 +46,7 @@ class PackageListModel(QAbstractListModel):
 
 
 class PackageListView(QListView):
-    def __init__(self):
+    def __init__(self) -> None:
         super(PackageListView, self).__init__()
         self.setAlternatingRowColors(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
