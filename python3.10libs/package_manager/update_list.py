@@ -1,6 +1,7 @@
-# coding: utf-8
+from typing import Any
 
-from __future__ import print_function
+from package_manager.package import Package
+
 
 try:
     from PyQt5.QtWidgets import *
@@ -13,30 +14,30 @@ except ImportError:
 
 
 class UpdateListModel(QAbstractListModel):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QObject | None = None) -> None:
         super(UpdateListModel, self).__init__(parent)
 
         self.__packages = ()
         self.__checked = set()
 
-    def updateData(self, packages):
+    def updateData(self, packages: list[Package]) -> None:
         self.beginResetModel()
         self.__packages = tuple(packages)
         self.__checked = set(packages)
         self.endResetModel()
 
     @property
-    def checked(self):
+    def checked(self) -> set[Package]:
         return self.__checked
 
-    def rowCount(self, parent):
+    def rowCount(self, parent: QModelIndex) -> int:
         return len(self.__packages)
 
-    def flags(self, index):
+    def flags(self, index: QModelIndex) -> Qt.ItemFlags:
         default_flags = super(UpdateListModel, self).flags(index)
         return default_flags | Qt.ItemIsUserCheckable
 
-    def setData(self, index, value, role):
+    def setData(self, index: QModelIndex, value: Any, role: int = Qt.EditRole) -> bool:
         if not index.isValid() or role != Qt.CheckStateRole:
             return False
 
@@ -49,7 +50,7 @@ class UpdateListModel(QAbstractListModel):
         self.dataChanged.emit(index, index)
         return True
 
-    def data(self, index, role):
+    def data(self, index: QModelIndex, role: int = Qt.DisplayRole) -> Any:
         package = self.__packages[index.row()]
         if role == Qt.DisplayRole:
             return package.name
@@ -60,7 +61,7 @@ class UpdateListModel(QAbstractListModel):
 
 
 class UpdateListView(QListView):
-    def __init__(self):
+    def __init__(self) -> None:
         super(UpdateListView, self).__init__()
         self.setAlternatingRowColors(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
