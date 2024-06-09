@@ -28,7 +28,7 @@ class FolderField(QWidget):
         self.pick_folder_button.setToolTip('Pick location')
         self.pick_folder_button.setFixedSize(24, 24)
         self.pick_folder_button.setIcon(hou.qt.Icon('BUTTONS_chooser_folder', 16, 16))
-        self.pick_folder_button.clicked.connect(self._pickLocation)
+        self.pick_folder_button.clicked.connect(self._pick_location)
         layout.addWidget(self.pick_folder_button)
 
     def text(self) -> str:
@@ -37,7 +37,7 @@ class FolderField(QWidget):
     def path(self) -> str:
         return hou.expandString(self.edit.text())
 
-    def _pickLocation(self) -> None:
+    def _pick_location(self) -> None:
         path = QFileDialog.getExistingDirectory(self, 'Package Folder', self.path())
         if path:
             path = path.replace('\\', '/')
