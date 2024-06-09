@@ -1,0 +1,93 @@
+[project]
+name = "houdini_package_manager"
+version = "0.0.0"
+readme = "README.md"
+requires-python = ">=3.10"
+
+[tool.ruff]
+src = ["package_manager"]
+fix = false
+respect-gitignore = true
+line-length = 120
+indent-width = 4
+lint.ignore-init-module-imports = true
+lint.select = [
+    "RUF", # ruff
+    "E", # pycodestyle
+    "W", # pycodestyle
+    "F", # pyflakes
+    "N", # pep8
+    "I", # isort
+    "D", # pydocstyle
+    "UP", # pyupgrade
+    "YTT", # flake8-2020
+    "S", # bandit
+    "BLE", # flake8-blind-except
+    "B", # flake8-bugbear
+    "COM", # flake8-commas
+    "C4", # flake8-comprehensions
+    "T10", # flake8-debugger
+    "FA", # flake8-future-annotations
+    "ISC", # flake8-implicit-str-concat
+    "INP", # flake8-no-pep420
+    "PIE", # flake8-pie
+    "T20", # flake8-print
+    "PT", # flake8-pytest-style
+    "Q002", # flake8-quotes: Single quote docstring found but double quotes preferred
+    "RSE", # flake8-raise
+    "RET", # flake8-return
+    "SLF", # flake8-self
+    "SLOT", # flake8-slots
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+    "ARG", # flake8-unused-arguments
+    "PTH", # flake8-use-pathlib
+    "TD", # flake8-todos
+    "ERA", # eradicate
+    "PGH", # pygrep-hooks
+    "PL", # Pylint
+    "TRY", # tryceratops
+    "FLY", # flynt
+    "PERF", # Perflint
+]
+lint.ignore = [
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "S108",
+    "D1",
+    "D203",
+    "D212",
+    "SIM108",
+    "N818",
+    "S314",
+]
+lint.per-file-ignores."tests/**" = ["S101"]
+
+[tool.ruff.lint.isort]
+case-sensitive = false
+force-single-line = true
+lines-after-imports = 2
+known-first-party = ["src"]
+force-to-top = ["src"]
+relative-imports-order = "closest-to-furthest"
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder"
+]
+forced-separate = ["tests"]
+
+[tool.ruff.lint.flake8-builtins]
+builtins-ignorelist = ["id"]
+
+[tool.ruff.lint.pylint]
+max-args = 10
+
+[tool.pytest.ini_options]
+minversion = "7.4"
+testpaths = ["tests"]
+addopts = "-ra --quiet --suppress-no-test-exit-code -p no:cacheprovider"
+timeout = 180

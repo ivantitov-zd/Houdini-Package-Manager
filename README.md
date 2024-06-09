@@ -86,4 +86,4 @@
 
 
 ## Автор
-Иван Титов - [GitHub](https://github.com/anvdev), [Telegram](http://t.me/anvdevv)
+Иван Титов - [GitHub](https://github.com/ivantitov_zd), [Telegram](http://t.me/ivantitov_zd)

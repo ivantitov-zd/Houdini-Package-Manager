@@ -1,0 +1,7 @@
+# JetBrains IDEs configs
+.idea
+**/*.iml
+
+# Python Precompiled
+**/*.pyc
+

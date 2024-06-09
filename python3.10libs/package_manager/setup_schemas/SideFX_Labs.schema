@@ -1,0 +1,14 @@
+{
+    "name": "SideFX Labs",
+    "author": "SideFX",
+    "env": [
+        {
+            "name": "sidefxlabs_current_version",
+            "value": "MANUAL"
+        },
+        {
+            "name": "PATH",
+            "value": "<package_root>/bin"
+        }
+    ]
+}
