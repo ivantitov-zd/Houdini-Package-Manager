@@ -6,7 +6,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
-from .local_package import LocalPackage
+from package_manager.local_package import LocalPackage
 
 
 class FolderField(QWidget):

@@ -5,15 +5,15 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
-from . import github
-from . import pypanel
-from .link_label import LinkLabel
-from .local_package import LocalPackage
-from .package import Package
-from .path_text import prepare_path
-from .shelves import shelves_in_file
-from .shelves import tools_in_file
-from .update_options import UpdateOptions
+from package_manager import github
+from package_manager import pypanel
+from package_manager.link_label import LinkLabel
+from package_manager.local_package import LocalPackage
+from package_manager.package import Package
+from package_manager.path_text import prepare_path
+from package_manager.shelves import shelves_in_file
+from package_manager.shelves import tools_in_file
+from package_manager.update_options import UpdateOptions
 
 
 class IconCache:

@@ -1,4 +1,4 @@
-from .package import Package
+from package_manager.package import Package
 
 
 class WebPackage(Package):

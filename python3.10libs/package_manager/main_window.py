@@ -3,12 +3,22 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
-from .local_package import find_installed_packages
-from .local_package_content import *
-from .package_list import *
-from .settings import SettingsWidget
-from .web_package_content import WebPackageInfoView
-from .web_package_list import *
+from package_manager.local_package import find_installed_packages
+from package_manager.local_package_content import OperatorListModel
+from package_manager.local_package_content import OperatorListView
+from package_manager.local_package_content import PackageInfoView
+from package_manager.local_package_content import PyPanelListModel
+from package_manager.local_package_content import PyPanelListView
+from package_manager.local_package_content import ShelfListModel
+from package_manager.local_package_content import ShelfListView
+from package_manager.local_package_content import ShelfToolListModel
+from package_manager.local_package_content import ShelfToolListView
+from package_manager.package_list import PackageListModel
+from package_manager.package_list import PackageListView
+from package_manager.settings import SettingsWidget
+from package_manager.web_package_content import WebPackageInfoView
+from package_manager.web_package_list import WebPackageListModel
+from package_manager.web_package_list import WebPackageListView
 
 
 class MainWindow(QWidget):

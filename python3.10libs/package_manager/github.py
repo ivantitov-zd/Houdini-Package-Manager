@@ -12,14 +12,13 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
+from package_manager.houdini_license import HOUDINI_COMMERCIAL_LICENSE
+from package_manager.houdini_license import full_houdini_license_name
+from package_manager.local_package import LocalPackage
+from package_manager.package import Package
 from package_manager.package import is_package
-
-from .houdini_license import HOUDINI_COMMERCIAL_LICENSE
-from .houdini_license import full_houdini_license_name
-from .local_package import LocalPackage
-from .package import Package
-from .version import Version
-from .web_package import WebPackage
+from package_manager.version import Version
+from package_manager.web_package import WebPackage
 
 
 class RepoNotFoundError(IOError):

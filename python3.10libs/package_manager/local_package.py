@@ -5,11 +5,11 @@ from typing import Any
 
 import hou
 
-from .houdini_license import full_houdini_license_name
-from .package import Package
-from .package import is_package
-from .package_status import full_package_status_name
-from .setup_schema import make_setup_schema
+from package_manager.houdini_license import full_houdini_license_name
+from package_manager.package import Package
+from package_manager.package import is_package
+from package_manager.package_status import full_package_status_name
+from package_manager.setup_schema import make_setup_schema
 
 
 class NotPackageError(IOError):

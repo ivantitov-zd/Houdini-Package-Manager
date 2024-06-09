@@ -3,11 +3,11 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
-from . import github
-from .houdini_license import full_houdini_license_name
-from .link_label import LinkLabel
-from .package_status import full_package_status_name
-from .web_package import WebPackage
+from package_manager import github
+from package_manager.houdini_license import full_houdini_license_name
+from package_manager.link_label import LinkLabel
+from package_manager.package_status import full_package_status_name
+from package_manager.web_package import WebPackage
 
 
 class WebPackageInfoView(QWidget):

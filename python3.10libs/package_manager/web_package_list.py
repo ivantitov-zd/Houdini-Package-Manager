@@ -9,9 +9,9 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
-from .version import Version
-from .version import VersionRange
-from .web_package import WebPackage
+from package_manager.version import Version
+from package_manager.version import VersionRange
+from package_manager.web_package import WebPackage
 
 
 class WebPackageListModel(QAbstractListModel):

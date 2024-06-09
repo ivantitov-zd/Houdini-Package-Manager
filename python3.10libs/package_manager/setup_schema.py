@@ -1,7 +1,7 @@
 import os
 from operator import itemgetter
 
-from .package import package_score
+from package_manager.package import package_score
 
 
 def dir_package_score(path: str) -> int:

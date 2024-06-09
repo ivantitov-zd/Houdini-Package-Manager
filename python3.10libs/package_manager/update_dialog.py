@@ -3,10 +3,10 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
-from . import github
-from .package import Package
-from .update_list import UpdateListModel
-from .update_list import UpdateListView
+from package_manager import github
+from package_manager.package import Package
+from package_manager.update_list import UpdateListModel
+from package_manager.update_list import UpdateListView
 
 
 class UpdateDialog(QDialog):

@@ -1,10 +1,10 @@
 from time import time
 
-from . import github
-from .local_package import find_installed_packages
-from .package import Package
-from .update_dialog import UpdateDialog
-from .update_options import UpdateOptions
+from package_manager import github
+from package_manager.local_package import find_installed_packages
+from package_manager.package import Package
+from package_manager.update_dialog import UpdateDialog
+from package_manager.update_options import UpdateOptions
 
 
 def has_update(package: Package, only_stable: bool | None = None) -> bool:
