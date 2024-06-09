@@ -1,7 +1,18 @@
 import hou
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide2.QtCore import QModelIndex
+from PySide2.QtCore import QSize
+from PySide2.QtCore import Qt
+from PySide2.QtGui import QKeyEvent
+from PySide2.QtWidgets import QButtonGroup
+from PySide2.QtWidgets import QHBoxLayout
+from PySide2.QtWidgets import QPushButton
+from PySide2.QtWidgets import QSizePolicy
+from PySide2.QtWidgets import QSpacerItem
+from PySide2.QtWidgets import QSplitter
+from PySide2.QtWidgets import QStackedLayout
+from PySide2.QtWidgets import QTabWidget
+from PySide2.QtWidgets import QVBoxLayout
+from PySide2.QtWidgets import QWidget
 
 from package_manager.local_package import find_installed_packages
 from package_manager.local_package_content import OperatorListModel

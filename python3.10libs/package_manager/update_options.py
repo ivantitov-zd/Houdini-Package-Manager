@@ -2,9 +2,7 @@ import json
 from typing import Any
 
 import hou
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide2.QtWidgets import QMessageBox
 
 from package_manager.package import Package
 

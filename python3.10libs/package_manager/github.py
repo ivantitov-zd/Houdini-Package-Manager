@@ -8,9 +8,13 @@ from typing import Any
 
 import hou
 import requests
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QComboBox
+from PySide2.QtWidgets import QDialog
+from PySide2.QtWidgets import QFormLayout
+from PySide2.QtWidgets import QHBoxLayout
+from PySide2.QtWidgets import QPushButton
+from PySide2.QtWidgets import QVBoxLayout
 
 from package_manager.houdini_license import HOUDINI_COMMERCIAL_LICENSE
 from package_manager.houdini_license import full_houdini_license_name

@@ -2,9 +2,11 @@ from collections.abc import Collection
 from typing import Any
 
 import hou
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide2.QtCore import QAbstractListModel
+from PySide2.QtCore import QModelIndex
+from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QListView
+from PySide2.QtWidgets import QWidget
 
 
 class PackageListModel(QAbstractListModel):

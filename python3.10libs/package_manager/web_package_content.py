@@ -1,7 +1,13 @@
 import hou
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide2.QtCore import Qt
+from PySide2.QtCore import Signal
+from PySide2.QtWidgets import QFormLayout
+from PySide2.QtWidgets import QLabel
+from PySide2.QtWidgets import QPushButton
+from PySide2.QtWidgets import QSizePolicy
+from PySide2.QtWidgets import QSpacerItem
+from PySide2.QtWidgets import QVBoxLayout
+from PySide2.QtWidgets import QWidget
 
 from package_manager import github
 from package_manager.houdini_license import full_houdini_license_name

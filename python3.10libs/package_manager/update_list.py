@@ -1,8 +1,10 @@
 from typing import Any
 
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide2.QtCore import QAbstractListModel
+from PySide2.QtCore import QModelIndex
+from PySide2.QtCore import QObject
+from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QListView
 
 from package_manager.package import Package
 

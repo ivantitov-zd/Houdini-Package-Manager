@@ -1,8 +1,10 @@
 import webbrowser
 
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide2.QtCore import Qt
+from PySide2.QtGui import QMouseEvent
+from PySide2.QtWidgets import QApplication
+from PySide2.QtWidgets import QLabel
+from PySide2.QtWidgets import QMenu
 
 
 def is_link(url: str) -> bool:
