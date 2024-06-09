@@ -1,13 +1,14 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 import json
+from typing import Any
+
+from package_manager.package import Package
+
 
 try:
     from PyQt5.QtWidgets import *
     from PyQt5.QtGui import *
     from PyQt5.QtCore import *
+
 
     Signal = pyqtSignal
 except ImportError:
@@ -21,18 +22,18 @@ import hou
 class UpdateOptions(object):
     _instance = None
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, **kwargs) -> 'UpdateOptions':
         if not cls._instance:
             cls._instance = super(UpdateOptions, cls).__new__(cls)
         return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         if self.__class__._instance is not self:
             return
 
         self._options_file_path = hou.expandString('$HOUDINI_USER_PREF_DIR/package_manager.update_options')
 
-    def setField(self, field_name, value):
+    def setField(self, field_name: str, value: Any) -> None:
         try:
             with open(self._options_file_path) as file:
                 options_data = json.load(file)
@@ -43,7 +44,7 @@ class UpdateOptions(object):
             options_data[field_name] = value
             json.dump(options_data, file, indent=4)
 
-    def getField(self, field_name):
+    def getField(self, field_name: str) -> Any:
         try:
             with open(self._options_file_path) as file:
                 options_data = json.load(file)
@@ -51,7 +52,7 @@ class UpdateOptions(object):
         except (IOError, ValueError):
             return
 
-    def setFieldForPackage(self, package, field_name, value):
+    def setFieldForPackage(self, package: Package, field_name: str, value: Any) -> None:
         try:
             with open(self._options_file_path) as file:
                 options_data = json.load(file)
@@ -71,7 +72,7 @@ class UpdateOptions(object):
         with open(self._options_file_path, 'w') as file:
             json.dump(options_data, file, indent=4)
 
-    def getFieldForPackage(self, package, field_name):
+    def getFieldForPackage(self, package: Package, field_name: str) -> Any | None:
         try:
             with open(self._options_file_path) as file:
                 options_data = json.load(file)
@@ -79,12 +80,12 @@ class UpdateOptions(object):
                 package_options_data = options_data['packages'][package_full_name]
                 return package_options_data.get(field_name)
         except (IOError, ValueError, KeyError):
-            return
+            return None
 
-    def setCheckOnStartup(self, enable):
+    def setCheckOnStartup(self, enable: bool) -> None:
         self.setField('check_on_startup', enable)
 
-    def checkOnStartup(self):
+    def checkOnStartup(self) -> bool:
         try:
             with open(self._options_file_path) as file:
                 options_data = json.load(file)
@@ -98,22 +99,22 @@ class UpdateOptions(object):
             self.setCheckOnStartup(check)
             return check
 
-    def setLastCheckTime(self, time):
+    def setLastCheckTime(self, time: int | float) -> None:
         self.setField('last_update_check', time)
 
-    def lastCheckTime(self):
+    def lastCheckTime(self) -> int | float:
         return self.getField('last_update_check') or 0
 
-    def setCheckOnStartupForPackage(self, package, enable):
+    def setCheckOnStartupForPackage(self, package: Package, enable: bool) -> None:
         self.setFieldForPackage(package, 'check_on_startup', enable)
 
-    def checkOnStartupForPackage(self, package):
+    def checkOnStartupForPackage(self, package: Package) -> bool:
         check = self.getFieldForPackage(package, 'check_on_startup')
         return check if check is not None else True
 
-    def setOnlyStableForPackage(self, package, enable):
+    def setOnlyStableForPackage(self, package: Package, enable: bool) -> None:
         self.setFieldForPackage(package, 'only_stable', enable)
 
-    def onlyStableForPackage(self, package):
+    def onlyStableForPackage(self, package: Package) -> bool:
         only_stable = self.getFieldForPackage(package, 'only_stable')
         return only_stable if only_stable is not None else True
