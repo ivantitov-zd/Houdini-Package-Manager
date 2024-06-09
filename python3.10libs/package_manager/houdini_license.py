@@ -1,8 +1,5 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 import hou
+
 
 HOUDINI_COMMERCIAL_LICENSE = hou.licenseCategoryType.Commercial
 HOUDINI_INDIE_LICENSE = hou.licenseCategoryType.Indie
@@ -10,7 +7,7 @@ HOUDINI_EDUCATION_LICENSE = hou.licenseCategoryType.Education
 HOUDINI_APPRENTICE_LICENSE = hou.licenseCategoryType.Apprentice
 
 
-def houdiniLicenseFromName(name):
+def houdiniLicenseFromName(name: str) -> hou.licenseCategoryType:
     name = name.lower()
 
     if name.startswith(('com', 'full', 'fx', 'core')):
@@ -28,7 +25,7 @@ def houdiniLicenseFromName(name):
     raise ValueError('Invalid license name')
 
 
-def fullHoudiniLicenseName(name_or_lic):
+def fullHoudiniLicenseName(name_or_lic: str | hou.licenseCategoryType) -> str | None:
     if isinstance(name_or_lic, str):
         lic = houdiniLicenseFromName(name_or_lic)
     elif isinstance(name_or_lic, hou.licenseCategoryType):
