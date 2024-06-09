@@ -1,4 +1,4 @@
-from __future__ import print_function
+from datetime import timedelta
 
 import hou
 
@@ -10,5 +10,5 @@ if hou.isUIAvailable():
     options = UpdateOptions()
     current_time = time()
     # It should be over 4 hours since the last check.
-    if options.checkOnStartup() and current_time - options.lastCheckTime() > 14400:
+    if options.checkOnStartup() and current_time - options.lastCheckTime() > timedelta(hours=4).total_seconds():
         checkForUpdates()

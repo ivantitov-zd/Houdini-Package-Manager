@@ -1,13 +1,12 @@
-# coding: utf-8
-
-from __future__ import print_function
+from typing import Collection
 
 
-class Package(object):
-    pass
+class Package:
+    source: str
+    content_path: str | None
 
 
-def packageScore(items):
+def packageScore(items: Collection[str]) -> int:
     XML_NAMES = ('AnimationEditorDopesheetContextMenu',
                  'AnimationEditorDopesheetMenu',
                  'AnimationEditorGraphContextMenu',
@@ -100,5 +99,5 @@ def packageScore(items):
     return scores
 
 
-def isPackage(items, threshold=2):
+def isPackage(items: Collection[str], threshold: int = 2) -> bool:
     return packageScore(items) >= threshold
