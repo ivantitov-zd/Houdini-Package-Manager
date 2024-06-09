@@ -1,7 +1,3 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 try:
     from PyQt5.QtWidgets import *
     from PyQt5.QtGui import *
@@ -22,7 +18,7 @@ from .settings import SettingsWidget
 
 
 class MainWindow(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super(MainWindow, self).__init__(parent, Qt.Window)
 
         self.setWindowTitle('Package Manager')
@@ -174,34 +170,34 @@ class MainWindow(QWidget):
 
         self.current_web_package = None
 
-    def updateLocalPackageList(self):
+    def updateLocalPackageList(self) -> None:
         self.package_list_model.setPackageList(findInstalledPackages())
         self.current_package = None
 
-    def updateWebPackageList(self):
+    def updateWebPackageList(self) -> None:
         self.web_list_model.updateData()
 
-    def updateContentSource(self):
+    def updateContentSource(self) -> None:
         content_widget = self.package_content_tabs.currentWidget()
         content_widget.setPackage(self.current_package)
 
-    def updateWebContentSource(self):
+    def updateWebContentSource(self) -> None:
         self.web_info_view.setWebPackage(self.current_web_package)
 
-    def _setCurrentPackage(self, index):
+    def _setCurrentPackage(self, index: QModelIndex) -> None:
         package = index.data(Qt.UserRole)
         self.current_package = package
         self.updateContentSource()
 
-    def _setCurrentWebPackage(self, index):
+    def _setCurrentWebPackage(self, index: QModelIndex) -> None:
         web_package = index.data(Qt.UserRole)
         self.current_web_package = web_package
         self.updateWebContentSource()
 
-    def _switchPanel(self, panel_id):
+    def _switchPanel(self, panel_id: int) -> None:
         self.stack_layout.setCurrentIndex(panel_id)
 
-    def keyPressEvent(self, event):
+    def keyPressEvent(self, event: QKeyEvent) -> None:
         key = event.key()
         modifiers = event.modifiers()
         if modifiers == Qt.NoModifier and key == Qt.Key_F5:
