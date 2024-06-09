@@ -1,6 +1,5 @@
-# coding: utf-8
+from typing import Any
 
-from __future__ import print_function
 
 try:
     from PyQt5.QtWidgets import *
@@ -17,7 +16,7 @@ from . import github
 
 
 class InstallFromWebLinkDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super(InstallFromWebLinkDialog, self).__init__(parent)
 
         self.setWindowTitle('Package Manager: Install from Web Link')
@@ -60,22 +59,23 @@ class InstallFromWebLinkDialog(QDialog):
         cancel_button.clicked.connect(self.reject)
         buttons_layout.addWidget(cancel_button)
 
-    def updateButtonState(self):
+    def updateButtonState(self) -> None:
         path = self.web_link_field.text()
         self.ok_button.setEnabled(bool(path))
 
     @classmethod
-    def getInstallationData(cls, parent=None):
+    def getInstallationData(cls, parent: QWidget | None = None) -> tuple[int, str, Any]:
         dialog = cls(parent)
         return (dialog.exec_(),
                 dialog.web_link_field.text(),
                 dialog.setup_schema_combo.currentData(Qt.UserRole))
 
 
-def installPackageFromWebLink(parent=None):
+def installPackageFromWebLink(parent: QWidget | None = None) -> bool:
     ok, link, schema = InstallFromWebLinkDialog.getInstallationData(parent)
     if ok and link:
         if github.installFromRepo(link, setup_schema=schema):
             hou.ui.setStatusMessage('Successfully installed',
                                     hou.severityType.ImportantMessage)
         return True
+    return False
