@@ -1,9 +1,7 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 import json
 import os
+from typing import Any
+from typing import Generator
 
 import hou
 
@@ -25,13 +23,13 @@ class AlreadyInstalledError(IOError):
     pass
 
 
-def isPackageFolder(path):
+def isPackageFolder(path: str) -> bool | None:
     if not os.path.isdir(path):
         return None
     return isPackage(os.listdir(path))
 
 
-def packageNameFromContent(content_path):
+def packageNameFromContent(content_path: str) -> str | None:
     setup_file_path = os.path.join(content_path, 'package.setup')
     name = None
     if os.path.exists(setup_file_path) and os.path.isfile(setup_file_path):
@@ -47,7 +45,7 @@ def packageNameFromContent(content_path):
     return name
 
 
-def packageAuthorFromContent(content_path):
+def packageAuthorFromContent(content_path: str) -> str | None:
     setup_file_path = os.path.join(content_path, 'package.setup')
     if os.path.exists(setup_file_path) and os.path.isfile(setup_file_path):
         with open(setup_file_path) as file:
@@ -55,7 +53,7 @@ def packageAuthorFromContent(content_path):
         return data.get('author')
 
 
-def findFiles(path, ignore_folders=True, recursive=False):
+def findFiles(path: str, ignore_folders: bool = True, recursive: bool = False) -> Generator[str, Any, None]:
     for root, folders, files in os.walk(path):
         for file in files:
             yield os.path.join(root, file)
@@ -67,7 +65,7 @@ def findFiles(path, ignore_folders=True, recursive=False):
 
 
 class LocalPackage(Package):
-    def __init__(self, package_file):
+    def __init__(self, package_file: str) -> None:
         self.package_file = os.path.normpath(package_file).replace('\\', '/')
 
         if not os.path.isfile(package_file):
@@ -101,7 +99,13 @@ class LocalPackage(Package):
         self.status = fullPackageStatusName(data.get(u'status'))
         self.setup_schema = data.get(u'setup_schema')
 
-    def files(self, extensions, root='', ignore_folders=True, recursive=False):
+    def files(
+            self,
+            extensions: tuple[str, ...],
+            root: str = '',
+            ignore_folders: bool = True,
+            recursive: bool = False,
+    ) -> tuple[str, ...]:
         if not os.path.isdir(self.content_path):
             raise hou.ObjectWasDeleted
 
@@ -116,22 +120,22 @@ class LocalPackage(Package):
                 file_list.append(file_path)
         return tuple(file_list)
 
-    def libraries(self):
+    def libraries(self) -> tuple[str, ...]:
         return self.files(('.otl', '.otlnc', '.otllc',
                            '.hda', '.hdanc', '.hdalc'),
                           root='otls',
                           ignore_folders=False)
 
-    def shelves(self):
+    def shelves(self) -> tuple[str, ...]:
         return self.files('.shelf', 'toolbar')
 
-    def panels(self):
+    def panels(self) -> tuple[str, ...]:
         return self.files('.pypanel', 'python_panels')
 
-    def isInstalled(self):
+    def isInstalled(self) -> bool:
         return os.path.isfile(self.package_file)
 
-    def isEnabled(self):
+    def isEnabled(self) -> bool:
         try:
             with open(self.package_file, 'r', encoding='utf-8') as file:
                 data = json.load(file)
@@ -139,7 +143,7 @@ class LocalPackage(Package):
         except IOError:
             return False  # Todo: raise NotInstalledError?
 
-    def enable(self, enable=True):
+    def enable(self, enable: bool = True) -> None:
         # Todo: check if not installed
         with open(self.package_file, 'r') as file:
             data = json.load(file)
@@ -148,7 +152,7 @@ class LocalPackage(Package):
             json.dump(data, file, indent=4)
 
     @staticmethod
-    def install(content_path, enable=True, setup_schema=None):
+    def install(content_path: str, enable: bool = True, setup_schema: Any = None) -> None:
         content_path = os.path.normpath(content_path).replace('\\', '/')
 
         if not os.path.exists(content_path) or not os.path.isdir(content_path):
@@ -179,27 +183,29 @@ class LocalPackage(Package):
                 ]
             }
             if 'hda_roots' in setup_schema and setup_schema['hda_roots']:
-                hda_roots_vars = {u'HOUDINI_OTLSCAN_PATH': list(map(lambda r: '${0}/{1}'.format(name.upper(), r),
-                                                                    setup_schema['hda_roots']))}
+                hda_roots_vars = {
+                    u'HOUDINI_OTLSCAN_PATH': list(map(lambda r: '${0}/{1}'.format(name.upper(), r),
+                                                      setup_schema['hda_roots']))
+                }
                 data[u'env'].append(hda_roots_vars)
         with open(package_file, 'w') as file:
             json.dump(data, file, indent=4)
 
-    def uninstall(self):
+    def uninstall(self) -> None:
         # Todo: optional remove package content folder
         os.remove(self.package_file)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return 'Package(r"{0}")'.format(self.package_file)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.content_path
 
 
-def findInstalledPackages():
-    def jsonsFromFolderAlphabetical(path):
+def findInstalledPackages() -> tuple[LocalPackage, ...]:
+    def jsonsFromFolderAlphabetical(path: str) -> list[str]:
         if not os.path.isdir(path):
-            return ()
+            return []
         file_paths = []
         for file in os.listdir(path):
             file_path = os.path.join(path, file)
