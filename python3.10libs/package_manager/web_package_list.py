@@ -1,10 +1,8 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 import json
 from operator import itemgetter
 from time import sleep
+from typing import Any
+
 
 try:
     from PyQt5.QtWidgets import *
@@ -23,13 +21,13 @@ from .version import Version, VersionRange
 
 
 class WebPackageListModel(QAbstractListModel):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QObject | None = None) -> None:
         super(WebPackageListModel, self).__init__(parent)
 
         self.__data = ()
         self.updateData()
 
-    def updateData(self, packages=None):
+    def updateData(self, packages: list[WebPackage] | None = None) -> None:
         self.beginResetModel()
         hversion = Version(hou.applicationVersionString())
         items = []
@@ -74,10 +72,10 @@ class WebPackageListModel(QAbstractListModel):
         self.__data = tuple(items)
         self.endResetModel()
 
-    def rowCount(self, parent):
+    def rowCount(self, parent: QModelIndex) -> int:
         return len(self.__data)
 
-    def data(self, index, role):
+    def data(self, index: QModelIndex, role: int = Qt.DisplayRole) -> Any:
         item = self.__data[index.row()]
         if role == Qt.DisplayRole:
             return item.name
@@ -86,7 +84,7 @@ class WebPackageListModel(QAbstractListModel):
 
 
 class WebPackageListView(QListView):
-    def __init__(self):
+    def __init__(self) -> None:
         super(WebPackageListView, self).__init__()
         self.setAlternatingRowColors(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
