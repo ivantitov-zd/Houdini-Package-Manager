@@ -1,6 +1,5 @@
-# coding: utf-8
+from .package import Package
 
-from __future__ import print_function
 
 try:
     from PyQt5.QtWidgets import *
@@ -18,7 +17,7 @@ from . import github
 
 
 class UpdateDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super(UpdateDialog, self).__init__(parent)
 
         self.setWindowTitle('Package Manager: Updates')
@@ -81,12 +80,14 @@ class UpdateDialog(QDialog):
 
         self.package = None
 
-    def _setCurrentPackage(self, index):
+    def _setCurrentPackage(self, index: QModelIndex) -> None:
         package = index.data(Qt.UserRole)
         self.package = package
         self.current_version_label.setText(package.version)
         if package.source_type == 'github':
-            releases_api_url = 'https://api.github.com/repos/{0}/{1}/releases'.format(*github.ownerAndRepoName(package.source))
+            releases_api_url = 'https://api.github.com/repos/{0}/{1}/releases'.format(
+                *github.ownerAndRepoName(package.source)
+            )
             releases_data = github.API.get(releases_api_url)
             if releases_data:
                 last_version_data = releases_data[0]
@@ -100,11 +101,11 @@ class UpdateDialog(QDialog):
             self.new_version_label.setText(new_version)
             self.update_changes_label.setText(changes)
 
-    def setPackageList(self, packages):
+    def setPackageList(self, packages: list[Package]) -> None:
         self.web_list_model.updateData(packages)
 
     @classmethod
-    def getUpdateFlags(cls, packages):
+    def getUpdateFlags(cls, packages: list[Package]) -> tuple[int, set]:
         window = cls(hou.qt.mainWindow())
         window.setPackageList(packages)
         return window.exec_(), window.web_list_model.checked
