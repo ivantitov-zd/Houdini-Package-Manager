@@ -1,13 +1,12 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 import os
+from typing import Any
+
 
 try:
     from PyQt5.QtWidgets import *
     from PyQt5.QtGui import *
     from PyQt5.QtCore import *
+
 
     Signal = pyqtSignal
 except ImportError:
@@ -24,7 +23,7 @@ class FolderField(QWidget):
     # Signals
     textChanged = Signal(str)
 
-    def __init__(self, content=''):
+    def __init__(self, content: str = '') -> None:
         super(FolderField, self).__init__()
 
         layout = QHBoxLayout(self)
@@ -42,13 +41,13 @@ class FolderField(QWidget):
         self.pick_folder_button.clicked.connect(self._pickLocation)
         layout.addWidget(self.pick_folder_button)
 
-    def text(self):
+    def text(self) -> str:
         return self.edit.text()
 
-    def path(self):
+    def path(self) -> str:
         return hou.expandString(self.edit.text())
 
-    def _pickLocation(self):
+    def _pickLocation(self) -> None:
         path = QFileDialog.getExistingDirectory(self, 'Package Folder', self.path())
         if path:
             path = path.replace('\\', '/')
@@ -56,7 +55,7 @@ class FolderField(QWidget):
 
 
 class InstallFromFolderPathDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super(InstallFromFolderPathDialog, self).__init__(parent)
 
         self.setWindowTitle('Package Manager: Install from Local Folder')
@@ -95,22 +94,23 @@ class InstallFromFolderPathDialog(QDialog):
         cancel_button.clicked.connect(self.reject)
         buttons_layout.addWidget(cancel_button)
 
-    def updateButtonState(self):
+    def updateButtonState(self) -> None:
         path = self.folder_path_field.path()
         self.ok_button.setEnabled(bool(path and os.path.exists(path) and os.path.isdir(path)))
 
     @classmethod
-    def getInstallationData(cls, parent=None):
+    def getInstallationData(cls, parent: QWidget | None = None) -> tuple[int, str, Any]:
         dialog = cls(parent)
         return (dialog.exec_(),
                 dialog.folder_path_field.text(),
                 dialog.setup_schema_combo.currentData(Qt.UserRole))
 
 
-def pickAndInstallPackageFromFolder(parent=None):
+def pickAndInstallPackageFromFolder(parent=None) -> bool:
     ok, path, schema = InstallFromFolderPathDialog.getInstallationData(parent)
     if ok and path:
         if LocalPackage.install(path, setup_schema=schema):
             hou.ui.setStatusMessage('Successfully installed',
                                     hou.severityType.ImportantMessage)
         return True
+    return False
