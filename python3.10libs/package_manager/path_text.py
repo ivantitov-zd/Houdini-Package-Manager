@@ -1,12 +1,8 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 import math
 import os
 
 
-def truncateMid(value, length):
+def truncateMid(value: str, length: int) -> str:
     if len(value) <= length:
         return value
 
@@ -23,7 +19,7 @@ def truncateMid(value, length):
     return '{0}…{1}'.format(pre, post)
 
 
-def truncatePath(path, length):
+def truncatePath(path: str, length: int) -> str:
     if len(path) <= length:
         return path
 
@@ -49,5 +45,5 @@ def truncatePath(path, length):
     return '{0}…{1}'.format(pre, post)
 
 
-def preparePath(path, length):
+def preparePath(path: str, length: int) -> str:
     return truncatePath(os.path.normpath(path).replace('\\', '/'), length)
