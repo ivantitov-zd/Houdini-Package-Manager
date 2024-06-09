@@ -3,6 +3,7 @@ from typing import Collection
 
 class Package:
     source: str
+    source_type: str
     content_path: str | None
 
 

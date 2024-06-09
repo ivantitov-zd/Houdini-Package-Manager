@@ -1,28 +1,26 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 from time import time
 
 from . import github
 from .local_package import findInstalledPackages
+from .package import Package
 from .update_dialog import UpdateDialog
 from .update_options import UpdateOptions
 
 
-def hasUpdate(package, only_stable=None):
+def hasUpdate(package: Package, only_stable: bool | None = None) -> bool:
     only_stable = only_stable or UpdateOptions().onlyStableForPackage(package)
     if package.source_type == 'github':
         return github.repoHasUpdate(package.source, package.version, package.version_type, only_stable)
+    return False
 
 
-def updatePackage(package):
+def updatePackage(package: Package) -> None:
     only_stable = UpdateOptions().onlyStableForPackage(package)
     if package.source_type == 'github':
         github.installFromRepo(package, update=True, only_stable=only_stable)
 
 
-def checkForUpdates(ignore_options=False):
+def checkForUpdates(ignore_options: bool = False) -> None:
     packages = []
     for package in findInstalledPackages():
         if not package.source or not package.source_type or not package.version:
