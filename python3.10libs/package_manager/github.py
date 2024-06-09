@@ -19,19 +19,19 @@ except ImportError:
     from PySide2.QtGui import *
     from PySide2.QtCore import *
 
-from package_manager.package import isPackage
-from .houdini_license import HOUDINI_COMMERCIAL_LICENSE, fullHoudiniLicenseName
+from package_manager.package import is_package
+from .houdini_license import HOUDINI_COMMERCIAL_LICENSE, full_houdini_license_name
 from .local_package import LocalPackage
 from .package import Package
 from .version import Version
 from .web_package import WebPackage
 
 
-class RepoNotFound(IOError):
+class RepoNotFoundError(IOError):
     pass
 
 
-class ReachedAPILimit(Exception):
+class ReachedAPILimitError(Exception):
     pass
 
 
@@ -43,7 +43,7 @@ class CacheItem:
         self.etag = etag
         self.last_modified = last_modified
 
-    def toJson(self) -> dict:
+    def to_json(self) -> dict:
         return {
             'data': self.data,
             'etag': self.etag,
@@ -51,12 +51,12 @@ class CacheItem:
         }
 
     @classmethod
-    def fromJson(cls, data: dict) -> 'CacheItem':
+    def from_json(cls, data: dict) -> 'CacheItem':
         return cls(data['data'], data.get('etag'), data.get('last_modified'))
 
 
 class API:
-    cache_data: dict = {}
+    cache_data: dict[str, CacheItem] = {}
 
     @staticmethod
     def get(url: str, headers: dict | None = None, timeout: int | float = 5) -> dict:
@@ -71,7 +71,7 @@ class API:
             headers_data.update(headers)
 
         try:
-            API.loadFromFile()
+            API.load_from_file()
         except IOError:
             pass
 
@@ -92,63 +92,63 @@ class API:
             etag = response.headers.get('ETag')
             last_modified = response.headers.get('Last-Modified')
             API.cache_data[url] = CacheItem(data, etag, last_modified)
-            API.saveToFile()
+            API.save_to_file()
             return data
         elif response.status_code == 304:
             return API.cache_data[url].data
         elif response.status_code == 403:
-            raise ReachedAPILimit
+            raise ReachedAPILimitError
         elif response.status_code == 404:
-            raise RepoNotFound(url)  # Todo: explainable message
+            raise RepoNotFoundError(url)  # Todo: explainable message
 
     @staticmethod
-    def toJson() -> dict:
-        return {url: item.toJson() for url, item in API.cache_data.items()}
+    def to_json() -> dict:
+        return {url: item.to_json() for url, item in API.cache_data.items()}
 
     @staticmethod
-    def fromJson(data: dict) -> None:
+    def from_json(data: dict) -> None:
         for url, item_data in data.items():
-            API.cache_data[url] = CacheItem.fromJson(item_data)
+            API.cache_data[url] = CacheItem.from_json(item_data)
 
     @staticmethod
-    def saveToFile() -> None:
+    def save_to_file() -> None:
         file_path = hou.expandString('$HOUDINI_USER_PREF_DIR/package_manager.github_api_cache')
         with open(file_path, 'w') as file:
-            json.dump(API.toJson(), file)
+            json.dump(API.to_json(), file)
 
     @staticmethod
-    def loadFromFile() -> None:
+    def load_from_file() -> None:
         file_path = hou.expandString('$HOUDINI_USER_PREF_DIR/package_manager.github_api_cache')
         with open(file_path) as file:
-            API.fromJson(json.load(file))
+            API.from_json(json.load(file))
 
     @staticmethod
     def clear() -> None:
         API.cache_data = {}
-        API.saveToFile()
+        API.save_to_file()
 
     @staticmethod
-    def cacheSize() -> None:
+    def cache_size() -> None:
         raise NotImplementedError
 
 
-def ownerAndRepoName(source: str) -> list[str]:
+def owner_and_repo_name(source: str) -> list[str]:
     return source.strip('/').split('/')[-2:]
 
 
-def repoURL(owner: str, repo_name: str) -> str:
+def repo_url(owner: str, repo_name: str) -> str:
     return 'https://github.com/{0}/{1}'.format(owner, repo_name)
 
 
-def isPackageRepo(source: str) -> bool:
-    repo_owner, repo_name = ownerAndRepoName(source)
+def is_package_repo(source: str) -> bool:
+    repo_owner, repo_name = owner_and_repo_name(source)
     api_repo_url = 'https://api.github.com/repos/{0}/{1}/contents'.format(repo_owner, repo_name)
     repo_content = API.get(api_repo_url)
     items = tuple(file_data['name'] for file_data in repo_content)
-    return isPackage(items)
+    return is_package(items)
 
 
-def extractRepoZip(
+def extract_repo_zip(
         file_path: str,
         repo_data: dict,
         dst_location: str = '$HOUDINI_USER_PREF_DIR',
@@ -172,19 +172,19 @@ def extractRepoZip(
     return dst_location
 
 
-def ownerName(login: str) -> str:
+def owner_name(login: str) -> str:
     return API.get('https://api.github.com/users/' + login).get('name', login)
 
 
-def repoDescription(package_or_link: str | Package) -> str:
+def repo_description(package_or_link: str | Package) -> str:
     if isinstance(package_or_link, Package):
-        repo_owner, repo_name = ownerAndRepoName(package_or_link.source)
+        repo_owner, repo_name = owner_and_repo_name(package_or_link.source)
     else:  # package_or_link is link
-        repo_owner, repo_name = ownerAndRepoName(package_or_link)
+        repo_owner, repo_name = owner_and_repo_name(package_or_link)
     return API.get('https://api.github.com/repos/{0}/{1}'.format(repo_owner, repo_name)).get('description')
 
 
-def updatePackageDataFile(
+def update_package_data_file(
         repo_data: str,
         package: WebPackage | None,
         package_location: str,
@@ -218,7 +218,7 @@ def updatePackageDataFile(
     if not data.get('hlicense'):
         data['hlicense'] = package.hlicense or \
                            data.get('hlicense') or \
-                           fullHoudiniLicenseName(HOUDINI_COMMERCIAL_LICENSE)
+                           full_houdini_license_name(HOUDINI_COMMERCIAL_LICENSE)
     if not data.get('status') or update:
         data['status'] = package.status or data.get('status') or 'Stable'
     if not data.get('setup_schema') or update:
@@ -227,7 +227,7 @@ def updatePackageDataFile(
         json.dump(data, file, indent=4)
 
 
-def downloadFile(url: str, dst_location: str = '$TEMP') -> str:
+def download_file(url: str, dst_location: str = '$TEMP') -> str:
     zip_file_path = os.path.join(hou.expandString(dst_location), os.path.basename(url) + '.zip')
     with open(zip_file_path, 'wb') as file:
         response = requests.get(url, timeout=5)
@@ -257,7 +257,7 @@ class PickReleaseDialog(QDialog):
         main_layout.addLayout(buttons_layout)
 
         ok_button = QPushButton('OK')
-        ok_button.clicked.connect(self._onOk)
+        ok_button.clicked.connect(self._on_ok)
         buttons_layout.addWidget(ok_button)
 
         cancel_button = QPushButton('Cancel')
@@ -266,19 +266,19 @@ class PickReleaseDialog(QDialog):
 
         self.current_release = None
 
-    def _onOk(self) -> None:
+    def _on_ok(self) -> None:
         self.current_release = self.release_combo.currentData(Qt.UserRole)
         self.accept()
 
-    def _setReleaseList(self, releases: Iterable[dict]) -> None:
+    def _set_release_list(self, releases: Iterable[dict]) -> None:
         self.release_combo.clear()
         for release_data in releases:
             self.release_combo.addItem(release_data['tag_name'], release_data)
 
     @classmethod
-    def getRelease(cls, releases, parent=None):
+    def get_release(cls, releases, parent=None):
         window = cls(parent)
-        window._setReleaseList(releases)
+        window._set_release_list(releases)
         window.exec_()
         return window.current_release
 
@@ -305,7 +305,7 @@ class PickAssetDialog(QDialog):
         main_layout.addLayout(buttons_layout)
 
         ok_button = QPushButton('OK')
-        ok_button.clicked.connect(self._onOk)
+        ok_button.clicked.connect(self._on_ok)
         buttons_layout.addWidget(ok_button)
 
         cancel_button = QPushButton('Cancel')
@@ -314,29 +314,29 @@ class PickAssetDialog(QDialog):
 
         self.current_asset = None
 
-    def _onOk(self) -> None:
+    def _on_ok(self) -> None:
         self.current_asset = self.asset_combo.currentData(Qt.UserRole)
         self.accept()
 
-    def _setAssetList(self, assets) -> None:
+    def _set_asset_list(self, assets) -> None:
         self.asset_combo.clear()
         for asset_data in assets:
             self.asset_combo.addItem(asset_data['name'], asset_data)
         self.asset_combo.addItem('Repo Archive', 'repo_archive')
 
     @classmethod
-    def getAsset(cls, release_data, parent=None):
+    def get_asset(cls, release_data, parent=None):
         window = cls(parent)
-        window._setAssetList(release_data['assets'])
+        window._set_asset_list(release_data['assets'])
         window.exec_()
         return window.current_asset
 
 
-# def isReleaseStable(release):
+# def is_release_stable(release) -> bool:
 #     raise NotImplementedError
 
 
-def installFromRepo(
+def install_from_repo(
         package_or_link: str | Package,
         dst_location: str = '$HOUDINI_USER_PREF_DIR',
         update: bool = False,
@@ -345,9 +345,9 @@ def installFromRepo(
 ) -> bool:
     if isinstance(package_or_link, Package):
         package = package_or_link
-        repo_owner, repo_name = ownerAndRepoName(package.source)
+        repo_owner, repo_name = owner_and_repo_name(package.source)
     else:  # package_or_link is link
-        repo_owner, repo_name = ownerAndRepoName(package_or_link)
+        repo_owner, repo_name = owner_and_repo_name(package_or_link)
         package = WebPackage()
 
     repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(repo_owner, repo_name)
@@ -374,7 +374,7 @@ def installFromRepo(
         if len(suitable_releases) == 1 or update:
             release_data = suitable_releases[0]
         else:
-            release_data = PickReleaseDialog.getRelease(suitable_releases, hou.qt.mainWindow())
+            release_data = PickReleaseDialog.get_release(suitable_releases, hou.qt.mainWindow())
             if not release_data:
                 return False  # Cancelled
         version_type = 'version'
@@ -384,7 +384,7 @@ def installFromRepo(
             if len(release_data['assets']) == 1:
                 asset_data = release_data['assets'][0]
             else:
-                asset_data = PickAssetDialog.getAsset(release_data, hou.qt.mainWindow())
+                asset_data = PickAssetDialog.get_asset(release_data, hou.qt.mainWindow())
 
             if asset_data == 'repo_archive':
                 asset_url = release_data['zipball_url']
@@ -402,45 +402,45 @@ def installFromRepo(
         branch = repo_data.get('default_branch', 'master')
         asset_url = 'https://github.com/{0}/{1}/zipball/{2}'.format(repo_owner, repo_name, branch)
 
-    zip_file = downloadFile(asset_url)
+    zip_file = download_file(asset_url)
     if update:
         dst_location, dst_name = os.path.split(package.content_path)
-        package_location = extractRepoZip(zip_file, repo_data, dst_location, dst_name)
+        package_location = extract_repo_zip(zip_file, repo_data, dst_location, dst_name)
     else:
-        package_location = extractRepoZip(zip_file, repo_data, dst_location)
+        package_location = extract_repo_zip(zip_file, repo_data, dst_location)
     os.remove(zip_file)
 
-    updatePackageDataFile(repo_data, package, package_location, version, version_type, update)
+    update_package_data_file(repo_data, package, package_location, version, version_type, update)
 
     if not update:
         LocalPackage.install(package_location, setup_schema=package.setup_schema or setup_schema)
     return True
 
 
-def parseTimestamp(timestamp_string: str) -> datetime:
+def parse_timestamp(timestamp_string: str) -> datetime:
     return datetime.datetime.strptime(timestamp_string, '%Y-%m-%dT%H:%M:%SZ')
 
 
-def repoHasUpdate(
+def repo_has_update(
         link: str,
         version: str,
         version_type: str,
         only_stable: bool = True
 ) -> bool:
-    repo_owner, repo_name = ownerAndRepoName(link)
+    repo_owner, repo_name = owner_and_repo_name(link)
 
     repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(repo_owner, repo_name)
     if version_type == 'time_github':
         repo_data = API.get(repo_api_url)
-        latest_version = parseTimestamp(repo_data['pushed_at'])
-        version = parseTimestamp(version)
+        latest_version = parse_timestamp(repo_data['pushed_at'])
+        version = parse_timestamp(version)
         # Todo: support only_stable
     else:  # version_type == 'version':
         if only_stable:
             latest_release_api_url = repo_api_url + '/releases/latest'
             try:
                 release_data = API.get(latest_release_api_url)
-            except RepoNotFound:
+            except RepoNotFoundError:
                 return False
         else:
             releases_api_url = repo_api_url + '/releases'

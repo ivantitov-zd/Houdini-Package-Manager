@@ -23,8 +23,8 @@ except ImportError:
 import hou
 
 from .link_label import LinkLabel
-from .path_text import preparePath
-from .shelves import shelvesInFile, toolsInFile
+from .path_text import prepare_path
+from .shelves import shelves_in_file, tools_in_file
 from . import github
 from .update_options import UpdateOptions
 from . import pypanel
@@ -143,11 +143,11 @@ class PackageInfoView(QWidget):
         self.update_group.setLayout(update_layout)
 
         self.check_updates_on_startup_toggle = QCheckBox('Check on Startup')
-        self.check_updates_on_startup_toggle.toggled.connect(self._onToggleCheckUpdate)
+        self.check_updates_on_startup_toggle.toggled.connect(self._on_toggle_check_update)
         update_layout.addWidget(self.check_updates_on_startup_toggle)
 
         self.check_only_stable_toggle = QCheckBox('Only Stable Releases')
-        self.check_only_stable_toggle.toggled.connect(self._onToggleCheckOnlyStable)
+        self.check_only_stable_toggle.toggled.connect(self._on_toggle_check_only_stable)
         update_layout.addWidget(self.check_only_stable_toggle)
 
         # Todo: update button
@@ -155,24 +155,24 @@ class PackageInfoView(QWidget):
         # Enable/Disable
         self.enable_button = QPushButton('Enable')
         self.enable_button.setDisabled(True)
-        self.enable_button.clicked.connect(self._onEnable)
+        self.enable_button.clicked.connect(self._on_enable)
         main_layout.addWidget(self.enable_button)
 
         self.disable_button = QPushButton('Disable')
         self.disable_button.hide()
-        self.disable_button.clicked.connect(self._onDisable)
+        self.disable_button.clicked.connect(self._on_disable)
         main_layout.addWidget(self.disable_button)
 
         # Uninstall
         self.uninstall_button = QPushButton('Uninstall')
         self.uninstall_button.setDisabled(True)
-        self.uninstall_button.clicked.connect(self._onUninstall)
+        self.uninstall_button.clicked.connect(self._on_uninstall)
         main_layout.addWidget(self.uninstall_button)
 
         # Data
         self.__package = None
 
-    def updatePath(self) -> None:
+    def update_path(self) -> None:
         if self.__package is None:
             self.location_info.setText('')
             return
@@ -181,13 +181,13 @@ class PackageInfoView(QWidget):
         available_length = char_width * len(self.__package.content_path)
         if available_length > self.width() - char_width * 18:
             available_length = int(self.width() / char_width)
-        self.location_info.setText(preparePath(self.__package.content_path, available_length))
+        self.location_info.setText(prepare_path(self.__package.content_path, available_length))
 
     def resizeEvent(self, event: QResizeEvent) -> None:
-        self.updatePath()
+        self.update_path()
         super(PackageInfoView, self).resizeEvent(event)
 
-    def updateFromCurrentPackage(self) -> None:
+    def update_from_current_package(self) -> None:
         if self.__package is None:
             self.name_info.setText('')
             self.desc_info.setText('')
@@ -197,9 +197,9 @@ class PackageInfoView(QWidget):
             self.hlicense_info.setText('')
             self.status_info.setText('')
             self.location_info.setText('')
-            self.location_info.setLink(None)
+            self.location_info.set_link(None)
             self.source_info.setText('')
-            self.source_info.setLink(None)
+            self.source_info.set_link(None)
             self.state_info.setText('')
             self.update_group.hide()
             self.enable_button.setDisabled(True)
@@ -215,22 +215,22 @@ class PackageInfoView(QWidget):
         self.hversion_info.setText(self.__package.hversion or '-')
         self.hlicense_info.setText(self.__package.hlicense or '-')
         self.status_info.setText(self.__package.status or '-')
-        self.location_info.setLink('file:///' + self.__package.content_path)
-        self.updatePath()
+        self.location_info.set_link('file:///' + self.__package.content_path)
+        self.update_path()
         self.update_group.setEnabled(True)
         if self.__package.source is not None:
             self.source_info.setText('GitHub: ' + self.__package.source)
-            self.source_info.setLink(github.repoURL(*github.ownerAndRepoName(self.__package.source)))
+            self.source_info.set_link(github.repo_url(*github.owner_and_repo_name(self.__package.source)))
         else:
             self.source_info.setText('-')
-            self.source_info.setLink(None)
+            self.source_info.set_link(None)
         if self.__package.source and self.__package.source_type and self.__package.version:
-            check = UpdateOptions().checkOnStartupForPackage(self.__package)
+            check = UpdateOptions().check_on_startup_for_package(self.__package)
             self.check_updates_on_startup_toggle.blockSignals(True)
             self.check_updates_on_startup_toggle.setChecked(check)
             self.check_updates_on_startup_toggle.blockSignals(False)
 
-            only_stable = UpdateOptions().onlyStableForPackage(self.__package)
+            only_stable = UpdateOptions().only_stable_for_package(self.__package)
             self.check_only_stable_toggle.blockSignals(True)
             self.check_only_stable_toggle.setChecked(only_stable)
             self.check_only_stable_toggle.blockSignals(False)
@@ -238,7 +238,7 @@ class PackageInfoView(QWidget):
             self.update_group.show()
         else:
             self.update_group.hide()
-        if self.__package.isEnabled():
+        if self.__package.is_enabled():
             self.state_info.setText('Enabled')
             self.enable_button.hide()
             self.disable_button.setEnabled(True)
@@ -252,40 +252,40 @@ class PackageInfoView(QWidget):
     def package(self):
         return self.__package
 
-    def setPackage(self, package: Package) -> None:
+    def set_package(self, package: Package) -> None:
         self.__package = package
-        self.updateFromCurrentPackage()
+        self.update_from_current_package()
 
-    def _onToggleCheckUpdate(self, state: bool) -> None:
-        UpdateOptions().setCheckOnStartupForPackage(self.__package, state)
+    def _on_toggle_check_update(self, state: bool) -> None:
+        UpdateOptions().set_check_on_startup_for_package(self.__package, state)
 
-    def _onToggleCheckOnlyStable(self, state: bool) -> None:
-        UpdateOptions().setOnlyStableForPackage(self.__package, state)
+    def _on_toggle_check_only_stable(self, state: bool) -> None:
+        UpdateOptions().set_only_stable_for_package(self.__package, state)
 
-    def _onEnable(self) -> None:
+    def _on_enable(self) -> None:
         self.__package.enable(True)
-        self.updateFromCurrentPackage()
+        self.update_from_current_package()
         self.enabled.emit()
 
-    def _onDisable(self) -> None:
+    def _on_disable(self) -> None:
         self.__package.enable(False)
-        self.updateFromCurrentPackage()
+        self.update_from_current_package()
         self.disabled.emit()
 
-    def _onUninstall(self) -> None:
+    def _on_uninstall(self) -> None:
         self.__package.uninstall()
         self.uninstalled.emit()
         self.__package = None
-        self.updateFromCurrentPackage()
+        self.update_from_current_package()
 
 
 class OperatorListModel(QAbstractListModel):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, parent: QObject | None = None) -> None:
         super(OperatorListModel, self).__init__(parent)
 
         self.__data = ()
 
-    def setPackage(self, package: LocalPackage) -> None:
+    def set_package(self, package: LocalPackage) -> None:
         self.beginResetModel()
         try:
             hdas = []
@@ -316,22 +316,22 @@ class OperatorListView(QListView):
         self.setAlternatingRowColors(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-    def setPackage(self, package: LocalPackage) -> None:
-        self.model().setPackage(package)
+    def set_package(self, package: LocalPackage) -> None:
+        self.model().set_package(package)
 
 
 class ShelfListModel(QAbstractListModel):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, parent: QObject | None = None) -> None:
         super(ShelfListModel, self).__init__(parent)
 
         self.__data = ()
 
-    def setPackage(self, package: LocalPackage) -> None:
+    def set_package(self, package: LocalPackage) -> None:
         self.beginResetModel()
         try:
             shelves = []
             for shelf_path in package.shelves():
-                shelves.extend(shelvesInFile(shelf_path))
+                shelves.extend(shelves_in_file(shelf_path))
             self.__data = tuple(shelves)
         except (IOError, AttributeError):
             self.__data = ()
@@ -354,22 +354,22 @@ class ShelfListView(QListView):
         self.setAlternatingRowColors(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-    def setPackage(self, package: LocalPackage) -> None:
-        self.model().setPackage(package)
+    def set_package(self, package: LocalPackage) -> None:
+        self.model().set_package(package)
 
 
 class ShelfToolListModel(QAbstractListModel):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, parent: QObject | None = None) -> None:
         super(ShelfToolListModel, self).__init__(parent)
 
         self.__data = ()
 
-    def setPackage(self, package: LocalPackage) -> None:
+    def set_package(self, package: LocalPackage) -> None:
         self.beginResetModel()
         try:
             tools = []
             for shelf_path in package.shelves():
-                tools.extend(toolsInFile(shelf_path))
+                tools.extend(tools_in_file(shelf_path))
             self.__data = tuple(tools)
         except (IOError, AttributeError):
             self.__data = ()
@@ -394,22 +394,22 @@ class ShelfToolListView(QListView):
         self.setAlternatingRowColors(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-    def setPackage(self, package: LocalPackage) -> None:
-        self.model().setPackage(package)
+    def set_package(self, package: LocalPackage) -> None:
+        self.model().set_package(package)
 
 
 class PyPanelListModel(QAbstractListModel):
-    def __init__(self, parent: QWidget | None = None) -> None:
+    def __init__(self, parent: QObject | None = None) -> None:
         super(PyPanelListModel, self).__init__(parent)
 
         self.__data = ()
 
-    def setPackage(self, package: LocalPackage) -> None:
+    def set_package(self, package: LocalPackage) -> None:
         self.beginResetModel()
         try:
             panels = []
             for panel_path in package.panels():
-                panels.extend(pypanel.interfacesInFile(panel_path))
+                panels.extend(pypanel.interfaces_in_file(panel_path))
             self.__data = tuple(panels)
         except (IOError, AttributeError):
             self.__data = ()
@@ -434,5 +434,5 @@ class PyPanelListView(QListView):
         self.setAlternatingRowColors(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-    def setPackage(self, package: LocalPackage) -> None:
-        self.model().setPackage(package)
+    def set_package(self, package: LocalPackage) -> None:
+        self.model().set_package(package)

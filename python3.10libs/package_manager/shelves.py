@@ -1,7 +1,3 @@
-# coding: utf-8
-
-from __future__ import print_function
-
 from xml.etree import ElementTree
 
 
@@ -17,7 +13,7 @@ class ShelfItem(object):
         return self.__name
 
 
-def shelvesInFile(file_path: str) -> tuple[ShelfItem, ...]:
+def shelves_in_file(file_path: str) -> tuple[ShelfItem, ...]:
     shelves = []
     try:
         tree = ElementTree.parse(file_path)
@@ -45,7 +41,7 @@ class ShelfToolItem(object):
         return self.__icon
 
 
-def toolsInFile(file_path: str) -> tuple[ShelfToolItem, ...]:
+def tools_in_file(file_path: str) -> tuple[ShelfToolItem, ...]:
     tools = []
     try:
         tree = ElementTree.parse(file_path)

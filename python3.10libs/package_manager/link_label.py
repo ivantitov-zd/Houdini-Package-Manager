@@ -11,7 +11,7 @@ except ImportError:
     from PySide2.QtCore import *
 
 
-def isLink(url: str) -> bool:
+def is_link(url: str) -> bool:
     return url.startswith(('http:', 'https:', 'ftp:', 'www.', 'file:'))
 
 
@@ -23,7 +23,7 @@ class LinkLabel(QLabel):
         self.setStyleSheet('QLabel::hover { color: rgb(40, 123, 222); }')
 
         self.__link = None
-        self.setLink(link)
+        self.set_link(link)
 
         # Menu
         self.menu = QMenu(self)
@@ -32,10 +32,10 @@ class LinkLabel(QLabel):
     def link(self) -> str | None:
         return self.__link
 
-    def setLink(self, url: str) -> None:
+    def set_link(self, url: str) -> None:
         if not url:
             url = self.text()
-        if isLink(url):
+        if is_link(url):
             self.__link = url
             self.setCursor(Qt.PointingHandCursor)
         else:

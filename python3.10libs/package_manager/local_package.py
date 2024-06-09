@@ -5,10 +5,10 @@ from typing import Generator
 
 import hou
 
-from .houdini_license import fullHoudiniLicenseName
-from .package import Package, isPackage
-from .package_status import fullPackageStatusName
-from .setup_schema import makeSetupSchema
+from .houdini_license import full_houdini_license_name
+from .package import Package, is_package
+from .package_status import full_package_status_name
+from .setup_schema import make_setup_schema
 
 
 class NotPackageError(IOError):
@@ -23,13 +23,13 @@ class AlreadyInstalledError(IOError):
     pass
 
 
-def isPackageFolder(path: str) -> bool | None:
+def is_package_folder(path: str) -> bool | None:
     if not os.path.isdir(path):
         return None
-    return isPackage(os.listdir(path))
+    return is_package(os.listdir(path))
 
 
-def packageNameFromContent(content_path: str) -> str | None:
+def package_name_from_content(content_path: str) -> str | None:
     setup_file_path = os.path.join(content_path, 'package.setup')
     name = None
     if os.path.exists(setup_file_path) and os.path.isfile(setup_file_path):
@@ -45,7 +45,7 @@ def packageNameFromContent(content_path: str) -> str | None:
     return name
 
 
-def packageAuthorFromContent(content_path: str) -> str | None:
+def package_author_from_content(content_path: str) -> str | None:
     setup_file_path = os.path.join(content_path, 'package.setup')
     if os.path.exists(setup_file_path) and os.path.isfile(setup_file_path):
         with open(setup_file_path) as file:
@@ -53,7 +53,7 @@ def packageAuthorFromContent(content_path: str) -> str | None:
         return data.get('author')
 
 
-def findFiles(path: str, ignore_folders: bool = True, recursive: bool = False) -> Generator[str, Any, None]:
+def find_files(path: str, ignore_folders: bool = True, recursive: bool = False) -> Generator[str, Any, None]:
     for root, folders, files in os.walk(path):
         for file in files:
             yield os.path.join(root, file)
@@ -78,7 +78,7 @@ class LocalPackage(Package):
         if not os.path.isdir(self.content_path):
             raise IOError(self.content_path)
 
-        if not isPackageFolder(self.content_path):
+        if not is_package_folder(self.content_path):
             raise NotPackageError('Folder "{0}" is not a package'.format(self.content_path))
 
         setup_file = os.path.join(self.content_path, 'package.setup')
@@ -95,8 +95,8 @@ class LocalPackage(Package):
         self.version = data.get('version')
         self.version_type = data.get('version_type')
         self.hversion = data.get('hversion')
-        self.hlicense = fullHoudiniLicenseName(data.get('hlicense'))
-        self.status = fullPackageStatusName(data.get('status'))
+        self.hlicense = full_houdini_license_name(data.get('hlicense'))
+        self.status = full_package_status_name(data.get('status'))
         self.setup_schema = data.get('setup_schema')
 
     def files(
@@ -114,7 +114,7 @@ class LocalPackage(Package):
             return ()
 
         file_list = []
-        for file in findFiles(path, ignore_folders, recursive):
+        for file in find_files(path, ignore_folders, recursive):
             if file.endswith(extensions):
                 file_path = os.path.join(path, file)
                 file_list.append(file_path)
@@ -132,10 +132,10 @@ class LocalPackage(Package):
     def panels(self) -> tuple[str, ...]:
         return self.files('.pypanel', 'python_panels')
 
-    def isInstalled(self) -> bool:
+    def is_installed(self) -> bool:
         return os.path.isfile(self.package_file)
 
-    def isEnabled(self) -> bool:
+    def is_enabled(self) -> bool:
         try:
             with open(self.package_file, 'r', encoding='utf-8') as file:
                 data = json.load(file)
@@ -158,8 +158,8 @@ class LocalPackage(Package):
         if not os.path.exists(content_path) or not os.path.isdir(content_path):
             raise FileNotFoundError('Package folder not found')
 
-        name = packageNameFromContent(content_path).replace(' ', '_')  # Todo: what if name missing
-        author = packageAuthorFromContent(content_path)
+        name = package_name_from_content(content_path).replace(' ', '_')  # Todo: what if name missing
+        author = package_author_from_content(content_path)
         package_file_name = name + '.json'
         if author:
             package_file_name = author.replace(' ', '_') + '__' + package_file_name
@@ -167,7 +167,7 @@ class LocalPackage(Package):
         if os.path.exists(package_file):
             raise AlreadyInstalledError('Package already installed')
 
-        setup_schema = setup_schema or makeSetupSchema(content_path)
+        setup_schema = setup_schema or make_setup_schema(content_path)
         if not setup_schema:
             data = {
                 'enable': enable,
@@ -202,8 +202,8 @@ class LocalPackage(Package):
         return self.content_path
 
 
-def findInstalledPackages() -> tuple[LocalPackage, ...]:
-    def jsonsFromFolderAlphabetical(path: str) -> list[str]:
+def find_installed_packages() -> tuple[LocalPackage, ...]:
+    def jsons_from_folder_alphabetical(path: str) -> list[str]:
         if not os.path.isdir(path):
             return []
         file_paths = []
@@ -216,19 +216,19 @@ def findInstalledPackages() -> tuple[LocalPackage, ...]:
     json_paths = []
 
     packages_path = hou.expandString('$HOUDINI_USER_PREF_DIR/packages')
-    json_paths.extend(jsonsFromFolderAlphabetical(packages_path))
+    json_paths.extend(jsons_from_folder_alphabetical(packages_path))
 
     packages_path = hou.expandString('$HFS/packages')
-    json_paths.extend(jsonsFromFolderAlphabetical(packages_path))
+    json_paths.extend(jsons_from_folder_alphabetical(packages_path))
 
     if hou.getenv('HSITE') is not None:
         major, minor, build = hou.applicationVersion()
         packages_path = hou.expandString('$HSITE/houdini{0}.{1}/packages'.format(major, minor))
-        json_paths.extend(jsonsFromFolderAlphabetical(packages_path))
+        json_paths.extend(jsons_from_folder_alphabetical(packages_path))
 
     if hou.getenv('HOUDINI_PACKAGE_DIR') is not None:
         packages_path = hou.expandString('$HOUDINI_PACKAGE_DIR')
-        json_paths.extend(jsonsFromFolderAlphabetical(packages_path))
+        json_paths.extend(jsons_from_folder_alphabetical(packages_path))
 
     # Todo: support dynamic setting of the package dir if possible
 

@@ -15,8 +15,8 @@ import hou
 from .link_label import LinkLabel
 from . import github
 from .web_package import WebPackage
-from .houdini_license import fullHoudiniLicenseName
-from .package_status import fullPackageStatusName
+from .houdini_license import full_houdini_license_name
+from .package_status import full_package_status_name
 
 
 class WebPackageInfoView(QWidget):
@@ -84,7 +84,7 @@ class WebPackageInfoView(QWidget):
 
         self.install_button = QPushButton('Download and Install')
         self.install_button.setDisabled(True)
-        self.install_button.clicked.connect(self._onInstall)
+        self.install_button.clicked.connect(self._on_install)
         main_layout.addWidget(self.install_button)
 
         # Data
@@ -100,38 +100,38 @@ class WebPackageInfoView(QWidget):
         self.source_info.setText('')
         self.install_button.setDisabled(True)
 
-    def updateFromCurrentPackage(self) -> None:
+    def update_from_current_package(self) -> None:
         if self.web_package is None:
             self.clear()
             return
 
         try:
             self.name_info.setText(self.web_package.name)
-            self.desc_info.setText(self.web_package.description or github.repoDescription(self.web_package) or '-')
+            self.desc_info.setText(self.web_package.description or github.repo_description(self.web_package) or '-')
             self.author_info.setText(self.web_package.author or '-')
             self.hversion_info.setText(self.web_package.hversion or '*')
-            self.hlicense_info.setText(fullHoudiniLicenseName(self.web_package.hlicense) or 'Commercial')
-            self.status_info.setText(fullPackageStatusName(self.web_package.status) or 'Stable')
+            self.hlicense_info.setText(full_houdini_license_name(self.web_package.hlicense) or 'Commercial')
+            self.status_info.setText(full_package_status_name(self.web_package.status) or 'Stable')
             if self.web_package.source != '-':
                 self.source_info.setText('GitHub: ' + self.web_package.source)
-                self.source_info.setLink(github.repoURL(*github.ownerAndRepoName(self.web_package.source)))
+                self.source_info.set_link(github.repo_url(*github.owner_and_repo_name(self.web_package.source)))
             else:
                 self.source_info.setText(self.web_package.source)
-                self.source_info.setLink(None)
+                self.source_info.set_link(None)
             self.install_button.setEnabled(True)
         except Exception:  # Todo
             self.clear()
 
-    def setWebPackage(self, web_package_item: WebPackage) -> None:
+    def set_web_package(self, web_package_item: WebPackage) -> None:
         self.web_package = web_package_item
-        self.updateFromCurrentPackage()
+        self.update_from_current_package()
 
-    def _onInstall(self) -> None:
+    def _on_install(self) -> None:
         if self.web_package.source_type == 'github':
-            if not github.installFromRepo(self.web_package):
+            if not github.install_from_repo(self.web_package):
                 return  # Cancelled
         self.web_package = None
-        self.updateFromCurrentPackage()
+        self.update_from_current_package()
         hou.ui.setStatusMessage('Successfully installed',
                                 hou.severityType.ImportantMessage)
         self.installed.emit(self.web_package)

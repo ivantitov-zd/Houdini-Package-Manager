@@ -21,10 +21,10 @@ class SettingsWidget(QWidget):
 
         # Updating
         self.check_on_startup_toggle = QCheckBox('Check for updates on startup')
-        self.check_on_startup_toggle.toggled.connect(UpdateOptions().setCheckOnStartup)
+        self.check_on_startup_toggle.toggled.connect(UpdateOptions().set_check_on_startup)
         main_layout.addWidget(self.check_on_startup_toggle)
 
-        self.updateSettings()
+        self.update_settings()
 
         spacer = QSpacerItem(0, 10, QSizePolicy.Ignored, QSizePolicy.Expanding)
         main_layout.addSpacerItem(spacer)
@@ -51,7 +51,7 @@ class SettingsWidget(QWidget):
         # revert_button = QPushButton('Revert')
         # buttons_layout.addWidget(revert_button)
 
-    def updateSettings(self) -> None:
+    def update_settings(self) -> None:
         self.check_on_startup_toggle.blockSignals(True)
-        self.check_on_startup_toggle.setChecked(UpdateOptions().checkOnStartup())
+        self.check_on_startup_toggle.setChecked(UpdateOptions().check_on_startup())
         self.check_on_startup_toggle.blockSignals(False)

@@ -20,7 +20,7 @@ class UpdateListModel(QAbstractListModel):
         self.__packages = ()
         self.__checked = set()
 
-    def updateData(self, packages: list[Package]) -> None:
+    def update_data(self, packages: list[Package]) -> None:
         self.beginResetModel()
         self.__packages = tuple(packages)
         self.__checked = set(packages)

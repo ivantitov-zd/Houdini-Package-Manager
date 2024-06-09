@@ -95,7 +95,7 @@ class Token(object):
         return NotImplemented
 
 
-def parseVersion(version_string: str) -> tuple[tuple[Token, ...], tuple[Token, ...], str]:
+def parse_version(version_string: str) -> tuple[tuple[Token, ...], tuple[Token, ...], str] | None:
     """Returns ((<number_tokens>), (<qualifier_tokens>), <build_metadata>)"""
     # Find end of the redundant characters at the beginning
     start_index = -1
@@ -163,7 +163,7 @@ class Version(object):
             return
 
         self.__raw = source
-        self.__num_tokens, self.__qualifier_tokens, _ = parseVersion(source)
+        self.__num_tokens, self.__qualifier_tokens, _ = parse_version(source)
         first_nonzero_index = -1
         for index, token in enumerate(reversed(self.__num_tokens), 0):
             if token != 0:
@@ -299,7 +299,7 @@ class VersionRange(object):
             self.high_version = high_version
 
     @classmethod
-    def fromPattern(cls, pattern: str) -> 'VersionRange':
+    def from_pattern(cls, pattern: str) -> 'VersionRange':
         pattern = pattern.strip()
         if pattern == '*':
             low_version = Version('0')
@@ -348,9 +348,9 @@ class VersionPattern(object):
 
         for token in pattern.split():
             if len(token) > 1 and token.startswith('^'):
-                self.__exclude.append(VersionRange.fromPattern(token[1:]))
+                self.__exclude.append(VersionRange.from_pattern(token[1:]))
             else:
-                self.__include.append(VersionRange.fromPattern(token))
+                self.__include.append(VersionRange.from_pattern(token))
 
     @property
     def raw(self) -> str:
@@ -379,7 +379,7 @@ if False:
     assert Version('2.7') < '3.3'
     assert Version('3.3.0') == '3.3'
     assert Version('6') < Version('10')
-    assert '10.2.305' in VersionRange.fromPattern('6-10.3')
+    assert '10.2.305' in VersionRange.from_pattern('6-10.3')
     assert '18.5' in VersionPattern('18+')
     assert '17' not in VersionPattern('18+')
     assert Version('0.3-beta') == Version('0.3.0-beta')

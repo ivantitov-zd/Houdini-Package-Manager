@@ -7,7 +7,7 @@ HOUDINI_EDUCATION_LICENSE = hou.licenseCategoryType.Education
 HOUDINI_APPRENTICE_LICENSE = hou.licenseCategoryType.Apprentice
 
 
-def houdiniLicenseFromName(name: str) -> hou.licenseCategoryType:
+def houdini_license_from_name(name: str) -> hou.licenseCategoryType:
     name = name.lower()
 
     if name.startswith(('com', 'full', 'fx', 'core')):
@@ -25,9 +25,9 @@ def houdiniLicenseFromName(name: str) -> hou.licenseCategoryType:
     raise ValueError('Invalid license name')
 
 
-def fullHoudiniLicenseName(name_or_lic: str | hou.licenseCategoryType) -> str | None:
+def full_houdini_license_name(name_or_lic: str | hou.licenseCategoryType) -> str | None:
     if isinstance(name_or_lic, str):
-        lic = houdiniLicenseFromName(name_or_lic)
+        lic = houdini_license_from_name(name_or_lic)
     elif isinstance(name_or_lic, hou.licenseCategoryType):
         lic = name_or_lic
     else:

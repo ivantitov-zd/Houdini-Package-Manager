@@ -87,27 +87,27 @@ class InstallFromFolderPathDialog(QDialog):
         self.ok_button = QPushButton('OK')
         self.ok_button.clicked.connect(self.accept)
         buttons_layout.addWidget(self.ok_button)
-        self.folder_path_field.textChanged.connect(self.updateButtonState)
-        self.updateButtonState()
+        self.folder_path_field.textChanged.connect(self.update_button_state)
+        self.update_button_state()
 
         cancel_button = QPushButton('Cancel')
         cancel_button.clicked.connect(self.reject)
         buttons_layout.addWidget(cancel_button)
 
-    def updateButtonState(self) -> None:
+    def update_button_state(self) -> None:
         path = self.folder_path_field.path()
         self.ok_button.setEnabled(bool(path and os.path.exists(path) and os.path.isdir(path)))
 
     @classmethod
-    def getInstallationData(cls, parent: QWidget | None = None) -> tuple[int, str, Any]:
+    def get_installation_data(cls, parent: QWidget | None = None) -> tuple[int, str, Any]:
         dialog = cls(parent)
         return (dialog.exec_(),
                 dialog.folder_path_field.text(),
                 dialog.setup_schema_combo.currentData(Qt.UserRole))
 
 
-def pickAndInstallPackageFromFolder(parent=None) -> bool:
-    ok, path, schema = InstallFromFolderPathDialog.getInstallationData(parent)
+def pick_and_install_package_from_folder(parent=None) -> bool:
+    ok, path, schema = InstallFromFolderPathDialog.get_installation_data(parent)
     if ok and path:
         if LocalPackage.install(path, setup_schema=schema):
             hou.ui.setStatusMessage('Successfully installed',

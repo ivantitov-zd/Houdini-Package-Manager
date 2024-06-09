@@ -40,7 +40,7 @@ class UpdateDialog(QDialog):
         self.web_list_view.setModel(self.web_list_model)
         self.web_list_view.setFixedWidth(120)
         selection_model = self.web_list_view.selectionModel()
-        selection_model.currentChanged.connect(self._setCurrentPackage)
+        selection_model.currentChanged.connect(self._set_current_package)
         middle_layout.addWidget(self.web_list_view)
 
         form_layout = QFormLayout()
@@ -80,13 +80,13 @@ class UpdateDialog(QDialog):
 
         self.package = None
 
-    def _setCurrentPackage(self, index: QModelIndex) -> None:
+    def _set_current_package(self, index: QModelIndex) -> None:
         package = index.data(Qt.UserRole)
         self.package = package
         self.current_version_label.setText(package.version)
         if package.source_type == 'github':
             releases_api_url = 'https://api.github.com/repos/{0}/{1}/releases'.format(
-                *github.ownerAndRepoName(package.source)
+                *github.owner_and_repo_name(package.source)
             )
             releases_data = github.API.get(releases_api_url)
             if releases_data:
@@ -94,18 +94,18 @@ class UpdateDialog(QDialog):
                 new_version = last_version_data['tag_name']
                 changes = last_version_data['body']
             else:
-                repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(*github.ownerAndRepoName(package.source))
+                repo_api_url = 'https://api.github.com/repos/{0}/{1}'.format(*github.owner_and_repo_name(package.source))
                 repo_data = github.API.get(repo_api_url)
                 new_version = repo_data['pushed_at']
                 changes = 'No information'
             self.new_version_label.setText(new_version)
             self.update_changes_label.setText(changes)
 
-    def setPackageList(self, packages: list[Package]) -> None:
-        self.web_list_model.updateData(packages)
+    def set_package_list(self, packages: list[Package]) -> None:
+        self.web_list_model.update_data(packages)
 
     @classmethod
-    def getUpdateFlags(cls, packages: list[Package]) -> tuple[int, set]:
+    def get_update_flags(cls, packages: list[Package]) -> tuple[int, set]:
         window = cls(hou.qt.mainWindow())
-        window.setPackageList(packages)
+        window.set_package_list(packages)
         return window.exec_(), window.web_list_model.checked

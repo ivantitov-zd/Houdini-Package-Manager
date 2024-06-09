@@ -7,7 +7,7 @@ class Package:
     content_path: str | None
 
 
-def packageScore(items: Collection[str]) -> int:
+def package_score(items: Collection[str]) -> int:
     XML_NAMES = ('AnimationEditorDopesheetContextMenu',
                  'AnimationEditorDopesheetMenu',
                  'AnimationEditorGraphContextMenu',
@@ -100,5 +100,5 @@ def packageScore(items: Collection[str]) -> int:
     return scores
 
 
-def isPackage(items: Collection[str], threshold: int = 2) -> bool:
-    return packageScore(items) >= threshold
+def is_package(items: Collection[str], threshold: int = 2) -> bool:
+    return package_score(items) >= threshold

@@ -17,7 +17,7 @@ class PyPanelItem(object):
         return self.__icon
 
 
-def interfacesInFile(file_path: str) -> tuple[PyPanelItem, ...]:
+def interfaces_in_file(file_path: str) -> tuple[PyPanelItem, ...]:
     panels = []
     try:
         tree = ElementTree.parse(file_path)

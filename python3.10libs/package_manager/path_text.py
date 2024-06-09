@@ -2,7 +2,7 @@ import math
 import os
 
 
-def truncateMid(value: str, length: int) -> str:
+def truncate_mid(value: str, length: int) -> str:
     if len(value) <= length:
         return value
 
@@ -19,7 +19,7 @@ def truncateMid(value: str, length: int) -> str:
     return '{0}…{1}'.format(pre, post)
 
 
-def truncatePath(path: str, length: int) -> str:
+def truncate_path(path: str, length: int) -> str:
     if len(path) <= length:
         return path
 
@@ -32,12 +32,12 @@ def truncatePath(path: str, length: int) -> str:
     last_separator = path.rfind('/')
 
     if last_separator == -1:
-        return truncateMid(path, length)
+        return truncate_mid(path, length)
 
     filename_length = len(path) - last_separator - 1
 
     if filename_length + 2 > length:
-        return truncateMid(path, length)
+        return truncate_mid(path, length)
 
     pre = path[:length - filename_length - 2]
     post = path[last_separator:]
@@ -45,5 +45,5 @@ def truncatePath(path: str, length: int) -> str:
     return '{0}…{1}'.format(pre, post)
 
 
-def preparePath(path: str, length: int) -> str:
-    return truncatePath(os.path.normpath(path).replace('\\', '/'), length)
+def prepare_path(path: str, length: int) -> str:
+    return truncate_path(os.path.normpath(path).replace('\\', '/'), length)

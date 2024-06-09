@@ -9,7 +9,7 @@ except ImportError:
 
 import hou
 
-from .local_package import findInstalledPackages
+from .local_package import find_installed_packages
 from .package_list import *
 from .local_package_content import *
 from .web_package_list import *
@@ -37,7 +37,7 @@ class MainWindow(QWidget):
 
         view_mode_button_group = QButtonGroup(self)
         view_mode_button_group.setExclusive(True)
-        view_mode_button_group.buttonClicked['int'].connect(self._switchPanel)
+        view_mode_button_group.buttonClicked['int'].connect(self._switch_panel)
 
         self.local_mode_button = QPushButton()
         self.local_mode_button.setFixedSize(24, 24)
@@ -94,12 +94,12 @@ class MainWindow(QWidget):
         local_layout.addWidget(splitter)
 
         self.package_list_model = PackageListModel(self)
-        self.updateLocalPackageList()
+        self.update_local_package_list()
 
         package_list_view = PackageListView()
         package_list_view.setModel(self.package_list_model)
         selection_model = package_list_view.selectionModel()
-        selection_model.currentChanged.connect(self._setCurrentPackage)
+        selection_model.currentChanged.connect(self._set_current_package)
         splitter.addWidget(package_list_view)
 
         self.package_content_tabs = QTabWidget()
@@ -111,9 +111,9 @@ class MainWindow(QWidget):
         splitter.setStretchFactor(1, 1)
 
         general_view = PackageInfoView()
-        general_view.enabled.connect(self.updateLocalPackageList)
-        general_view.disabled.connect(self.updateLocalPackageList)
-        general_view.uninstalled.connect(self.updateLocalPackageList)
+        general_view.enabled.connect(self.update_local_package_list)
+        general_view.disabled.connect(self.update_local_package_list)
+        general_view.uninstalled.connect(self.update_local_package_list)
         self.package_content_tabs.addTab(general_view, 'General')
 
         operator_list_view = OperatorListView()
@@ -148,12 +148,12 @@ class MainWindow(QWidget):
         self.web_list_view = WebPackageListView()
         self.web_list_view.setModel(self.web_list_model)
         selection_model = self.web_list_view.selectionModel()
-        selection_model.currentChanged.connect(self._setCurrentWebPackage)
+        selection_model.currentChanged.connect(self._set_current_web_package)
         splitter.addWidget(self.web_list_view)
 
         self.web_info_view = WebPackageInfoView()
-        self.web_info_view.installed.connect(self.updateWebPackageList)
-        self.web_info_view.installed.connect(self.updateLocalPackageList)
+        self.web_info_view.installed.connect(self.update_web_package_list)
+        self.web_info_view.installed.connect(self.update_local_package_list)
 
         splitter.addWidget(self.web_info_view)
         splitter.setSizes((200, 400))
@@ -166,35 +166,35 @@ class MainWindow(QWidget):
 
         # Data
         self.current_package = None
-        self.package_content_tabs.currentChanged.connect(self.updateContentSource)
+        self.package_content_tabs.currentChanged.connect(self.update_content_source)
 
         self.current_web_package = None
 
-    def updateLocalPackageList(self) -> None:
-        self.package_list_model.setPackageList(findInstalledPackages())
+    def update_local_package_list(self) -> None:
+        self.package_list_model.set_package_list(find_installed_packages())
         self.current_package = None
 
-    def updateWebPackageList(self) -> None:
-        self.web_list_model.updateData()
+    def update_web_package_list(self) -> None:
+        self.web_list_model.update_data()
 
-    def updateContentSource(self) -> None:
+    def update_content_source(self) -> None:
         content_widget = self.package_content_tabs.currentWidget()
-        content_widget.setPackage(self.current_package)
+        content_widget.set_package(self.current_package)
 
-    def updateWebContentSource(self) -> None:
-        self.web_info_view.setWebPackage(self.current_web_package)
+    def update_web_content_source(self) -> None:
+        self.web_info_view.set_web_package(self.current_web_package)
 
-    def _setCurrentPackage(self, index: QModelIndex) -> None:
+    def _set_current_package(self, index: QModelIndex) -> None:
         package = index.data(Qt.UserRole)
         self.current_package = package
-        self.updateContentSource()
+        self.update_content_source()
 
-    def _setCurrentWebPackage(self, index: QModelIndex) -> None:
+    def _set_current_web_package(self, index: QModelIndex) -> None:
         web_package = index.data(Qt.UserRole)
         self.current_web_package = web_package
-        self.updateWebContentSource()
+        self.update_web_content_source()
 
-    def _switchPanel(self, panel_id: int) -> None:
+    def _switch_panel(self, panel_id: int) -> None:
         self.stack_layout.setCurrentIndex(panel_id)
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
@@ -203,20 +203,20 @@ class MainWindow(QWidget):
         if modifiers == Qt.NoModifier and key == Qt.Key_F5:
             current_panel_index = self.stack_layout.currentIndex()
             if current_panel_index == 0:
-                self.updateLocalPackageList()
+                self.update_local_package_list()
             elif current_panel_index == 1:
-                self.updateWebPackageList()
+                self.update_web_package_list()
         elif modifiers == Qt.NoModifier and key == Qt.Key_F1:
             desktop = hou.ui.curDesktop()
             desktop.displayHelpPath('/ref/windows/package_manager')
         elif modifiers == Qt.ControlModifier and key == Qt.Key_1:
             self.local_mode_button.setChecked(True)
-            self._switchPanel(0)
+            self._switch_panel(0)
         elif modifiers == Qt.ControlModifier and key == Qt.Key_2:
             self.web_mode_button.setChecked(True)
-            self._switchPanel(1)
+            self._switch_panel(1)
         elif modifiers == Qt.ControlModifier and key == Qt.Key_3:
             self.settings_mode_button.setChecked(True)
-            self._switchPanel(2)
+            self._switch_panel(2)
         else:
             super(MainWindow, self).keyPressEvent(event)

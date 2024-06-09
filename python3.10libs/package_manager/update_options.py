@@ -33,7 +33,7 @@ class UpdateOptions(object):
 
         self._options_file_path = hou.expandString('$HOUDINI_USER_PREF_DIR/package_manager.update_options')
 
-    def setField(self, field_name: str, value: Any) -> None:
+    def set_field(self, field_name: str, value: Any) -> None:
         try:
             with open(self._options_file_path) as file:
                 options_data = json.load(file)
@@ -44,7 +44,7 @@ class UpdateOptions(object):
             options_data[field_name] = value
             json.dump(options_data, file, indent=4)
 
-    def getField(self, field_name: str) -> Any:
+    def get_field(self, field_name: str) -> Any:
         try:
             with open(self._options_file_path) as file:
                 options_data = json.load(file)
@@ -52,7 +52,7 @@ class UpdateOptions(object):
         except (IOError, ValueError):
             return
 
-    def setFieldForPackage(self, package: Package, field_name: str, value: Any) -> None:
+    def set_field_for_package(self, package: Package, field_name: str, value: Any) -> None:
         try:
             with open(self._options_file_path) as file:
                 options_data = json.load(file)
@@ -72,7 +72,7 @@ class UpdateOptions(object):
         with open(self._options_file_path, 'w') as file:
             json.dump(options_data, file, indent=4)
 
-    def getFieldForPackage(self, package: Package, field_name: str) -> Any | None:
+    def get_field_for_package(self, package: Package, field_name: str) -> Any | None:
         try:
             with open(self._options_file_path) as file:
                 options_data = json.load(file)
@@ -82,10 +82,10 @@ class UpdateOptions(object):
         except (IOError, ValueError, KeyError):
             return None
 
-    def setCheckOnStartup(self, enable: bool) -> None:
-        self.setField('check_on_startup', enable)
+    def set_check_on_startup(self, enable: bool) -> None:
+        self.set_field('check_on_startup', enable)
 
-    def checkOnStartup(self) -> bool:
+    def check_on_startup(self) -> bool:
         try:
             with open(self._options_file_path) as file:
                 options_data = json.load(file)
@@ -96,25 +96,25 @@ class UpdateOptions(object):
                                          'Check for updates on startup?',
                                          QMessageBox.Yes | QMessageBox.No)
             check = reply == QMessageBox.Yes
-            self.setCheckOnStartup(check)
+            self.set_check_on_startup(check)
             return check
 
-    def setLastCheckTime(self, time: int | float) -> None:
-        self.setField('last_update_check', time)
+    def set_last_check_time(self, time: int | float) -> None:
+        self.set_field('last_update_check', time)
 
-    def lastCheckTime(self) -> int | float:
-        return self.getField('last_update_check') or 0
+    def last_check_time(self) -> int | float:
+        return self.get_field('last_update_check') or 0
 
-    def setCheckOnStartupForPackage(self, package: Package, enable: bool) -> None:
-        self.setFieldForPackage(package, 'check_on_startup', enable)
+    def set_check_on_startup_for_package(self, package: Package, enable: bool) -> None:
+        self.set_field_for_package(package, 'check_on_startup', enable)
 
-    def checkOnStartupForPackage(self, package: Package) -> bool:
-        check = self.getFieldForPackage(package, 'check_on_startup')
+    def check_on_startup_for_package(self, package: Package) -> bool:
+        check = self.get_field_for_package(package, 'check_on_startup')
         return check if check is not None else True
 
-    def setOnlyStableForPackage(self, package: Package, enable: bool) -> None:
-        self.setFieldForPackage(package, 'only_stable', enable)
+    def set_only_stable_for_package(self, package: Package, enable: bool) -> None:
+        self.set_field_for_package(package, 'only_stable', enable)
 
-    def onlyStableForPackage(self, package: Package) -> bool:
-        only_stable = self.getFieldForPackage(package, 'only_stable')
+    def only_stable_for_package(self, package: Package) -> bool:
+        only_stable = self.get_field_for_package(package, 'only_stable')
         return only_stable if only_stable is not None else True

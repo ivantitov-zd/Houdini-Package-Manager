@@ -25,9 +25,9 @@ class WebPackageListModel(QAbstractListModel):
         super(WebPackageListModel, self).__init__(parent)
 
         self.__data = ()
-        self.updateData()
+        self.update_data()
 
-    def updateData(self, packages: list[WebPackage] | None = None) -> None:
+    def update_data(self, packages: list[WebPackage] | None = None) -> None:
         self.beginResetModel()
         hversion = Version(hou.applicationVersionString())
         items = []
@@ -54,7 +54,7 @@ class WebPackageListModel(QAbstractListModel):
                 if not package_data.get('visible', True):
                     continue
 
-                if hversion not in VersionRange.fromPattern(package_data.get('hversion', '*')):
+                if hversion not in VersionRange.from_pattern(package_data.get('hversion', '*')):
                     continue
 
                 items.append(WebPackage(

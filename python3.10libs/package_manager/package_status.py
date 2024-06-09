@@ -5,7 +5,7 @@ BETA = 3
 STABLE = 4
 
 
-def packageStatusFromName(name: str) -> int:
+def package_status_from_name(name: str) -> int:
     name = name.lower()
 
     if name.startswith('dev'):
@@ -26,9 +26,9 @@ def packageStatusFromName(name: str) -> int:
     raise ValueError('Invalid status name')
 
 
-def fullPackageStatusName(name_or_status: str | int) -> str | None:
+def full_package_status_name(name_or_status: str | int) -> str | None:
     if isinstance(name_or_status, str):
-        status = packageStatusFromName(name_or_status)
+        status = package_status_from_name(name_or_status)
     else:  # isinstance(name_or_lic, int):
         status = name_or_status
     return {

@@ -24,7 +24,7 @@ class PackageListModel(QAbstractListModel):
 
         self.__data = ()
 
-    def setPackageList(self, packages: Collection[dict]) -> None:
+    def set_package_list(self, packages: Collection[dict]) -> None:
         self.beginResetModel()
         self.__data = tuple(packages)
         self.endResetModel()
@@ -39,7 +39,7 @@ class PackageListModel(QAbstractListModel):
         if role == Qt.UserRole:
             return item
         if role == Qt.DecorationRole:
-            if item.isEnabled():
+            if item.is_enabled():
                 return PackageListModel.ACTIVE_ON_ICON
             else:
                 return PackageListModel.ACTIVE_OFF_ICON
