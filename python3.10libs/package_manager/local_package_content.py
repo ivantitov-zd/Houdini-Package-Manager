@@ -2,10 +2,17 @@
 
 from __future__ import print_function
 
+from typing import Any
+
+from .local_package import LocalPackage
+from .package import Package
+
+
 try:
     from PyQt5.QtWidgets import *
     from PyQt5.QtGui import *
     from PyQt5.QtCore import *
+
 
     Signal = pyqtSignal
 except ImportError:
@@ -31,7 +38,7 @@ class IconCache:
     cache_data = {}
 
     @staticmethod
-    def icon(name):
+    def icon(name: str) -> hou.qt.Icon:
         if name not in IconCache.cache_data:
             try:
                 IconCache.cache_data[name] = hou.qt.Icon(name, 32, 32)
@@ -46,7 +53,7 @@ class PackageInfoView(QWidget):
     disabled = Signal()
     uninstalled = Signal()
 
-    def __init__(self):
+    def __init__(self) -> None:
         super(PackageInfoView, self).__init__()
 
         main_layout = QVBoxLayout(self)
@@ -165,7 +172,7 @@ class PackageInfoView(QWidget):
         # Data
         self.__package = None
 
-    def updatePath(self):
+    def updatePath(self) -> None:
         if self.__package is None:
             self.location_info.setText('')
             return
@@ -176,11 +183,11 @@ class PackageInfoView(QWidget):
             available_length = int(self.width() / char_width)
         self.location_info.setText(preparePath(self.__package.content_path, available_length))
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event: QResizeEvent) -> None:
         self.updatePath()
         super(PackageInfoView, self).resizeEvent(event)
 
-    def updateFromCurrentPackage(self):
+    def updateFromCurrentPackage(self) -> None:
         if self.__package is None:
             self.name_info.setText('')
             self.desc_info.setText('')
@@ -245,27 +252,27 @@ class PackageInfoView(QWidget):
     def package(self):
         return self.__package
 
-    def setPackage(self, package):
+    def setPackage(self, package: Package) -> None:
         self.__package = package
         self.updateFromCurrentPackage()
 
-    def _onToggleCheckUpdate(self, state):
+    def _onToggleCheckUpdate(self, state: bool) -> None:
         UpdateOptions().setCheckOnStartupForPackage(self.__package, state)
 
-    def _onToggleCheckOnlyStable(self, state):
+    def _onToggleCheckOnlyStable(self, state: bool) -> None:
         UpdateOptions().setOnlyStableForPackage(self.__package, state)
 
-    def _onEnable(self):
+    def _onEnable(self) -> None:
         self.__package.enable(True)
         self.updateFromCurrentPackage()
         self.enabled.emit()
 
-    def _onDisable(self):
+    def _onDisable(self) -> None:
         self.__package.enable(False)
         self.updateFromCurrentPackage()
         self.disabled.emit()
 
-    def _onUninstall(self):
+    def _onUninstall(self) -> None:
         self.__package.uninstall()
         self.uninstalled.emit()
         self.__package = None
@@ -273,12 +280,12 @@ class PackageInfoView(QWidget):
 
 
 class OperatorListModel(QAbstractListModel):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super(OperatorListModel, self).__init__(parent)
 
         self.__data = ()
 
-    def setPackage(self, package):
+    def setPackage(self, package: LocalPackage) -> None:
         self.beginResetModel()
         try:
             hdas = []
@@ -289,10 +296,10 @@ class OperatorListModel(QAbstractListModel):
             self.__data = ()
         self.endResetModel()
 
-    def rowCount(self, parent):
+    def rowCount(self, parent: QModelIndex) -> int:
         return len(self.__data)
 
-    def data(self, index, role):
+    def data(self, index: QModelIndex, role: int = Qt.DisplayRole) -> Any:
         item = self.__data[index.row()]
         if role == Qt.DisplayRole:
             return item.description()
@@ -304,22 +311,22 @@ class OperatorListModel(QAbstractListModel):
 
 
 class OperatorListView(QListView):
-    def __init__(self):
+    def __init__(self) -> None:
         super(OperatorListView, self).__init__()
         self.setAlternatingRowColors(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-    def setPackage(self, package):
+    def setPackage(self, package: LocalPackage) -> None:
         self.model().setPackage(package)
 
 
 class ShelfListModel(QAbstractListModel):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super(ShelfListModel, self).__init__(parent)
 
         self.__data = ()
 
-    def setPackage(self, package):
+    def setPackage(self, package: LocalPackage) -> None:
         self.beginResetModel()
         try:
             shelves = []
@@ -330,10 +337,10 @@ class ShelfListModel(QAbstractListModel):
             self.__data = ()
         self.endResetModel()
 
-    def rowCount(self, parent):
+    def rowCount(self, parent: QModelIndex) -> int:
         return len(self.__data)
 
-    def data(self, index, role):
+    def data(self, index: QModelIndex, role: int = Qt.DisplayRole) -> Any:
         item = self.__data[index.row()]
         if role == Qt.DisplayRole:
             return item.label()
@@ -342,22 +349,22 @@ class ShelfListModel(QAbstractListModel):
 
 
 class ShelfListView(QListView):
-    def __init__(self):
+    def __init__(self) -> None:
         super(ShelfListView, self).__init__()
         self.setAlternatingRowColors(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-    def setPackage(self, package):
+    def setPackage(self, package: LocalPackage) -> None:
         self.model().setPackage(package)
 
 
 class ShelfToolListModel(QAbstractListModel):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super(ShelfToolListModel, self).__init__(parent)
 
         self.__data = ()
 
-    def setPackage(self, package):
+    def setPackage(self, package: LocalPackage) -> None:
         self.beginResetModel()
         try:
             tools = []
@@ -368,10 +375,10 @@ class ShelfToolListModel(QAbstractListModel):
             self.__data = ()
         self.endResetModel()
 
-    def rowCount(self, parent):
+    def rowCount(self, parent: QModelIndex) -> int:
         return len(self.__data)
 
-    def data(self, index, role):
+    def data(self, index: QModelIndex, role: int = Qt.DisplayRole) -> Any:
         item = self.__data[index.row()]
         if role == Qt.DisplayRole:
             return item.label()
@@ -382,22 +389,22 @@ class ShelfToolListModel(QAbstractListModel):
 
 
 class ShelfToolListView(QListView):
-    def __init__(self):
+    def __init__(self) -> None:
         super(ShelfToolListView, self).__init__()
         self.setAlternatingRowColors(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-    def setPackage(self, package):
+    def setPackage(self, package: LocalPackage) -> None:
         self.model().setPackage(package)
 
 
 class PyPanelListModel(QAbstractListModel):
-    def __init__(self, parent=None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         super(PyPanelListModel, self).__init__(parent)
 
         self.__data = ()
 
-    def setPackage(self, package):
+    def setPackage(self, package: LocalPackage) -> None:
         self.beginResetModel()
         try:
             panels = []
@@ -408,10 +415,10 @@ class PyPanelListModel(QAbstractListModel):
             self.__data = ()
         self.endResetModel()
 
-    def rowCount(self, parent):
+    def rowCount(self, parent: QModelIndex) -> int:
         return len(self.__data)
 
-    def data(self, index, role):
+    def data(self, index: QModelIndex, role: int = Qt.DisplayRole) -> Any:
         item = self.__data[index.row()]
         if role == Qt.DisplayRole:
             return item.label()
@@ -422,10 +429,10 @@ class PyPanelListModel(QAbstractListModel):
 
 
 class PyPanelListView(QListView):
-    def __init__(self):
+    def __init__(self) -> None:
         super(PyPanelListView, self).__init__()
         self.setAlternatingRowColors(True)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-    def setPackage(self, package):
+    def setPackage(self, package: LocalPackage) -> None:
         self.model().setPackage(package)
