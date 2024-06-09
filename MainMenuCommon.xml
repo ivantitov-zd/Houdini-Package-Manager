@@ -27,9 +27,9 @@ window.show()
                 <scriptCode>
 import hdefereval
 
-from package_manager import pickAndInstallPackageFromFolder
+from package_manager import pick_and_install_package_from_folder
 
-hdefereval.executeDeferred(lambda: pickAndInstallPackageFromFolder(hou.qt.mainWindow()))
+hdefereval.executeDeferred(lambda: pick_and_install_package_from_folder(hou.qt.mainWindow()))
                 </scriptCode>
             </scriptItem>
 
@@ -38,9 +38,9 @@ hdefereval.executeDeferred(lambda: pickAndInstallPackageFromFolder(hou.qt.mainWi
                 <scriptCode>
 import hdefereval
 
-from package_manager import installPackageFromWebLink
+from package_manager import install_package_from_web_link
 
-hdefereval.executeDeferred(lambda: installPackageFromWebLink(hou.qt.mainWindow()))
+hdefereval.executeDeferred(lambda: install_package_from_web_link(hou.qt.mainWindow()))
                 </scriptCode>
             </scriptItem>
 
@@ -61,9 +61,9 @@ window.show()
                 <scriptCode>
 import hdefereval
 
-from package_manager import checkForUpdates
+from package_manager import check_for_updates
 
-hdefereval.executeDeferred(lambda: checkForUpdates(ignore_options=True))
+hdefereval.executeDeferred(lambda: check_for_updates(ignore_options=True))
                 </scriptCode>
             </scriptItem>
 
